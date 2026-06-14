@@ -63,7 +63,7 @@ fun CapturesScreen(
         LazyColumn(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(12.dp),
-            contentPadding = PaddingValues(horizontal = 16.dp, top = 12.dp, bottom = 72.dp)
+            contentPadding = PaddingValues(start = 16.dp, top = 12.dp, end = 16.dp, bottom = 72.dp)
         ) {
             if (uiState.pendingCaptures.isEmpty()) {
                 item { EmptyText("Nenhuma captura aguardando revisao.") }

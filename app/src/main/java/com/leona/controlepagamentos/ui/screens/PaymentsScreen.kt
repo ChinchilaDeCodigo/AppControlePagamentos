@@ -82,7 +82,7 @@ fun PaymentsScreen(
             LazyColumn(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
-                contentPadding = PaddingValues(horizontal = 16.dp, top = 12.dp, bottom = 96.dp)
+                contentPadding = PaddingValues(start = 16.dp, top = 12.dp, end = 16.dp, bottom = 96.dp)
             ) {
             item {
                 PaymentFilterRow(uiState.filter, onFilterChanged)
