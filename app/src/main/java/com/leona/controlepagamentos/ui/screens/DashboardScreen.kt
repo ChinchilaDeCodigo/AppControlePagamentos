@@ -2,13 +2,13 @@ package com.leona.controlepagamentos.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import com.leona.controlepagamentos.ui.components.ImmersiveHeader
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CheckCircle
@@ -16,6 +16,9 @@ import androidx.compose.material.icons.outlined.ChevronLeft
 import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material3.Card
+import com.leona.controlepagamentos.ui.theme.Alert
+import com.leona.controlepagamentos.ui.theme.Attention
+import com.leona.controlepagamentos.ui.theme.Success
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -46,59 +49,59 @@ fun DashboardScreen(
     onMarkRecurringPaid: (RecurringOccurrence) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    LazyColumn(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        item {
+    Column(modifier = modifier) {
+        ImmersiveHeader(title = "Início") {
             MonthHeader(
                 label = uiState.monthLabel,
                 onPreviousMonth = onPreviousMonth,
                 onNextMonth = onNextMonth
             )
         }
-        item {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-                    SummaryTile("Previsto", uiState.summary.plannedInCents, Modifier.weight(1f))
-                    SummaryTile("Pago", uiState.summary.paidInCents, Modifier.weight(1f))
-                }
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-                    SummaryTile("Pendente", uiState.summary.pendingInCents, Modifier.weight(1f))
-                    SummaryTile("Vencido", uiState.summary.overdueInCents, Modifier.weight(1f))
-                }
-            }
-        }
-        uiState.budgetProgress.firstOrNull { it.categoryId == null }?.let { budget ->
+        LazyColumn(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding = PaddingValues(horizontal = 16.dp, top = 16.dp, bottom = 72.dp)
+        ) {
             item {
-                BudgetOverviewCard(budget = budget)
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+                        SummaryTile("Previsto", uiState.summary.plannedInCents, Modifier.weight(1f))
+                        SummaryTile("Pago", uiState.summary.paidInCents, Modifier.weight(1f))
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+                        SummaryTile("Pendente", uiState.summary.pendingInCents, Modifier.weight(1f))
+                        SummaryTile("Vencido", uiState.summary.overdueInCents, Modifier.weight(1f))
+                    }
+                }
             }
-        }
-        item {
-            CaptureSummary(uiState.summary.pendingCaptureCount)
-        }
-        item {
-            SectionTitle("Proximos vencimentos")
-        }
-        if (uiState.upcomingPayments.isEmpty()) {
-            item { EmptyText("Nada pendente nos proximos dias.") }
-        } else {
-            items(uiState.upcomingPayments, key = { it.id }) { payment ->
-                UpcomingPaymentRow(payment = payment, onMarkPaid = onMarkPaid)
+            uiState.budgetProgress.firstOrNull { it.categoryId == null }?.let { budget ->
+                item {
+                    BudgetOverviewCard(budget = budget)
+                }
             }
-        }
-        item {
-            SectionTitle("Recorrencias previstas")
-        }
-        if (uiState.recurringOccurrences.isEmpty()) {
-            item { EmptyText("Sem recorrencias previstas para este mes.") }
-        } else {
-            items(uiState.recurringOccurrences, key = { it.ruleId + it.dueDate }) { occurrence ->
-                RecurringOccurrenceRow(occurrence = occurrence, onMarkPaid = onMarkRecurringPaid)
+            item {
+                CaptureSummary(uiState.summary.pendingCaptureCount)
             }
-        }
-        item {
-            Spacer(modifier = Modifier.height(72.dp))
+            item {
+                SectionTitle("Proximos vencimentos")
+            }
+            if (uiState.upcomingPayments.isEmpty()) {
+                item { EmptyText("Nada pendente nos proximos dias.") }
+            } else {
+                items(uiState.upcomingPayments, key = { it.id }) { payment ->
+                    UpcomingPaymentRow(payment = payment, onMarkPaid = onMarkPaid)
+                }
+            }
+            item {
+                SectionTitle("Recorrencias previstas")
+            }
+            if (uiState.recurringOccurrences.isEmpty()) {
+                item { EmptyText("Sem recorrencias previstas para este mes.") }
+            } else {
+                items(uiState.recurringOccurrences, key = { it.ruleId + it.dueDate }) { occurrence ->
+                    RecurringOccurrenceRow(occurrence = occurrence, onMarkPaid = onMarkRecurringPaid)
+                }
+            }
         }
     }
 }
@@ -145,9 +148,9 @@ private fun BudgetOverviewCard(budget: BudgetProgress) {
 
 @Composable
 private fun BudgetHealth.color() = when (this) {
-    BudgetHealth.HEALTHY -> MaterialTheme.colorScheme.primary
-    BudgetHealth.ATTENTION -> MaterialTheme.colorScheme.secondary
-    BudgetHealth.CRITICAL -> MaterialTheme.colorScheme.tertiary
+    BudgetHealth.HEALTHY -> Success
+    BudgetHealth.ATTENTION -> Attention
+    BudgetHealth.CRITICAL -> Alert
     BudgetHealth.EXCEEDED -> MaterialTheme.colorScheme.error
 }
 
@@ -167,7 +170,7 @@ fun MonthHeader(
         }
         Text(
             text = label,
-            style = MaterialTheme.typography.titleLarge,
+            style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.SemiBold
         )
         IconButton(onClick = onNextMonth) {

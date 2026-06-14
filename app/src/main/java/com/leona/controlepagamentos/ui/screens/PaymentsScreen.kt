@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import com.leona.controlepagamentos.ui.components.ImmersiveHeader
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -69,18 +70,20 @@ fun PaymentsScreen(
 ) {
     var showForm by rememberSaveable { mutableStateOf(false) }
 
-    Box(modifier = modifier.fillMaxSize()) {
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            contentPadding = PaddingValues(bottom = 96.dp)
-        ) {
-            item {
+    Box(modifier = modifier) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            ImmersiveHeader(title = "Pagamentos") {
                 MonthHeader(
                     label = uiState.monthLabel,
                     onPreviousMonth = onPreviousMonth,
                     onNextMonth = onNextMonth
                 )
             }
+            LazyColumn(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                contentPadding = PaddingValues(horizontal = 16.dp, top = 12.dp, bottom = 96.dp)
+            ) {
             item {
                 PaymentFilterRow(uiState.filter, onFilterChanged)
             }
@@ -109,7 +112,8 @@ fun PaymentsScreen(
                     }
                 }
             }
-        }
+        }  // LazyColumn
+        }  // Column
 
         ExtendedFloatingActionButton(
             onClick = { showForm = true },

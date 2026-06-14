@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import com.leona.controlepagamentos.ui.components.ImmersiveHeader
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.OpenInNew
@@ -51,11 +52,13 @@ fun SettingsScreen(
     var showSourceDialog by rememberSaveable { mutableStateOf(false) }
     val permissionEnabled = isNotificationListenerEnabled(context)
 
-    LazyColumn(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-        contentPadding = PaddingValues(bottom = 72.dp)
-    ) {
+    Column(modifier = modifier) {
+        ImmersiveHeader(title = "Ajustes")
+        LazyColumn(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            contentPadding = PaddingValues(horizontal = 16.dp, top = 12.dp, bottom = 72.dp)
+        ) {
         item { SectionTitle("Captura") }
         item {
             Card(shape = RoundedCornerShape(8.dp), modifier = Modifier.fillMaxWidth()) {
@@ -141,7 +144,8 @@ fun SettingsScreen(
                 }
             }
         }
-    }
+        }  // LazyColumn
+    }  // Column
 
     if (showSourceDialog) {
         AddSourceDialog(

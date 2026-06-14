@@ -8,6 +8,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import com.leona.controlepagamentos.ui.components.ImmersiveHeader
+import com.leona.controlepagamentos.ui.theme.Alert
+import com.leona.controlepagamentos.ui.theme.Attention
+import com.leona.controlepagamentos.ui.theme.Success
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -51,11 +55,13 @@ fun ReportsScreen(
     var showBudgetDialog by rememberSaveable { mutableStateOf(false) }
     val maxAmount = uiState.categoryTotals.maxOfOrNull { it.amountInCents }?.takeIf { it > 0 } ?: 1L
 
-    LazyColumn(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-        contentPadding = PaddingValues(bottom = 72.dp)
-    ) {
+    Column(modifier = modifier) {
+        ImmersiveHeader(title = "Relatórios")
+        LazyColumn(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            contentPadding = PaddingValues(horizontal = 16.dp, top = 12.dp, bottom = 72.dp)
+        ) {
         item { SectionTitle("Resumo do mes") }
         item { InsightGrid(uiState) }
 
@@ -91,7 +97,8 @@ fun ReportsScreen(
                 CategoryTotalRow(total = total, maxAmount = maxAmount)
             }
         }
-    }
+        }  // LazyColumn
+    }  // Column
 
     if (showBudgetDialog) {
         AddBudgetDialog(
@@ -286,8 +293,8 @@ private fun BudgetHealth.label(): String = when (this) {
 
 @Composable
 private fun BudgetHealth.color() = when (this) {
-    BudgetHealth.HEALTHY -> MaterialTheme.colorScheme.primary
-    BudgetHealth.ATTENTION -> MaterialTheme.colorScheme.secondary
-    BudgetHealth.CRITICAL -> MaterialTheme.colorScheme.tertiary
+    BudgetHealth.HEALTHY -> Success
+    BudgetHealth.ATTENTION -> Attention
+    BudgetHealth.CRITICAL -> Alert
     BudgetHealth.EXCEEDED -> MaterialTheme.colorScheme.error
 }

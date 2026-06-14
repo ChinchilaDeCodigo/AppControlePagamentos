@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import com.leona.controlepagamentos.ui.components.HeaderPill
+import com.leona.controlepagamentos.ui.components.ImmersiveHeader
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -49,32 +51,40 @@ fun CapturesScreen(
 ) {
     var editingCapture by rememberSaveable { mutableStateOf<String?>(null) }
     val captureToEdit = uiState.pendingCaptures.firstOrNull { it.id == editingCapture }
+    val pendingCount = uiState.pendingCaptures.size
 
-    LazyColumn(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-        contentPadding = PaddingValues(bottom = 72.dp)
-    ) {
-        item { SectionTitle("Capturas pendentes") }
-        if (uiState.pendingCaptures.isEmpty()) {
-            item { EmptyText("Nenhuma captura aguardando revisao.") }
-        } else {
-            items(uiState.pendingCaptures, key = { it.id }) { capture ->
-                CaptureRow(
-                    capture = capture,
-                    categories = uiState.categories,
-                    onEdit = { editingCapture = capture.id },
-                    onConfirm = {
-                        onConfirm(
-                            capture,
-                            capture.merchant.orEmpty(),
-                            capture.amountInCents?.let(MoneyFormatter::format).orEmpty(),
-                            capture.suggestedCategoryId,
-                            null
-                        )
-                    },
-                    onIgnore = { onIgnore(capture.id) }
-                )
+    Column(modifier = modifier) {
+        ImmersiveHeader(
+            title = "Capturados",
+            trailing = {
+                if (pendingCount > 0) HeaderPill("$pendingCount na fila")
+            }
+        )
+        LazyColumn(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            contentPadding = PaddingValues(horizontal = 16.dp, top = 12.dp, bottom = 72.dp)
+        ) {
+            if (uiState.pendingCaptures.isEmpty()) {
+                item { EmptyText("Nenhuma captura aguardando revisao.") }
+            } else {
+                items(uiState.pendingCaptures, key = { it.id }) { capture ->
+                    CaptureRow(
+                        capture = capture,
+                        categories = uiState.categories,
+                        onEdit = { editingCapture = capture.id },
+                        onConfirm = {
+                            onConfirm(
+                                capture,
+                                capture.merchant.orEmpty(),
+                                capture.amountInCents?.let(MoneyFormatter::format).orEmpty(),
+                                capture.suggestedCategoryId,
+                                null
+                            )
+                        },
+                        onIgnore = { onIgnore(capture.id) }
+                    )
+                }
             }
         }
     }

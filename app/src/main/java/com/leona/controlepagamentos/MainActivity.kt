@@ -14,15 +14,19 @@ import androidx.compose.material.icons.outlined.BarChart
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
+import com.leona.controlepagamentos.ui.theme.Alert
+import com.leona.controlepagamentos.ui.theme.Blue
+import com.leona.controlepagamentos.ui.theme.TextTertiary
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -72,7 +76,6 @@ private enum class MainTab(val label: String) {
     SETTINGS("Ajustes")
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun PaymentsApp(viewModel: PaymentsViewModel) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -87,17 +90,34 @@ private fun PaymentsApp(viewModel: PaymentsViewModel) {
     }
 
     Scaffold(
-        topBar = {
-            TopAppBar(title = { Text("Controle de Pagamentos") })
-        },
         bottomBar = {
             NavigationBar {
                 MainTab.entries.forEach { tab ->
+                    val navColors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = Blue,
+                        selectedTextColor = Blue,
+                        unselectedIconColor = TextTertiary,
+                        unselectedTextColor = TextTertiary,
+                        indicatorColor = Blue.copy(alpha = 0.12f)
+                    )
                     NavigationBarItem(
                         selected = selectedTab == tab,
                         onClick = { selectedTab = tab },
-                        icon = { Icon(tab.icon(), contentDescription = tab.label) },
-                        label = { Text(tab.label) }
+                        icon = {
+                            if (tab == MainTab.CAPTURES && uiState.pendingCaptures.isNotEmpty()) {
+                                BadgedBox(badge = {
+                                    Badge(containerColor = Alert) {
+                                        Text(uiState.pendingCaptures.size.toString())
+                                    }
+                                }) {
+                                    Icon(tab.icon(), contentDescription = tab.label)
+                                }
+                            } else {
+                                Icon(tab.icon(), contentDescription = tab.label)
+                            }
+                        },
+                        label = { Text(tab.label) },
+                        colors = navColors
                     )
                 }
             }
@@ -106,7 +126,6 @@ private fun PaymentsApp(viewModel: PaymentsViewModel) {
     ) { padding ->
         val contentModifier = Modifier
             .padding(padding)
-            .padding(horizontal = 16.dp, vertical = 12.dp)
             .fillMaxSize()
 
         when (selectedTab) {
