@@ -1,14 +1,22 @@
 package com.leona.controlepagamentos.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import com.leona.controlepagamentos.ui.components.ImmersiveHeader
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CheckCircle
@@ -16,9 +24,6 @@ import androidx.compose.material.icons.outlined.ChevronLeft
 import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material3.Card
-import com.leona.controlepagamentos.ui.theme.Alert
-import com.leona.controlepagamentos.ui.theme.Attention
-import com.leona.controlepagamentos.ui.theme.Success
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -29,6 +34,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.leona.controlepagamentos.data.model.PaymentEntity
@@ -37,7 +43,13 @@ import com.leona.controlepagamentos.domain.budget.BudgetProgress
 import com.leona.controlepagamentos.domain.money.MoneyFormatter
 import com.leona.controlepagamentos.domain.recurrence.RecurringOccurrence
 import com.leona.controlepagamentos.ui.components.AmountText
+import com.leona.controlepagamentos.ui.components.ImmersiveHeader
 import com.leona.controlepagamentos.ui.components.shortDate
+import com.leona.controlepagamentos.ui.theme.Alert
+import com.leona.controlepagamentos.ui.theme.Attention
+import com.leona.controlepagamentos.ui.theme.Blue
+import com.leona.controlepagamentos.ui.theme.Success
+import com.leona.controlepagamentos.ui.viewmodel.CategoryTotal
 import com.leona.controlepagamentos.ui.viewmodel.PaymentsUiState
 
 @Composable
@@ -49,12 +61,26 @@ fun DashboardScreen(
     onMarkRecurringPaid: (RecurringOccurrence) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val categoryMaxAmount = uiState.categoryTotals.maxOfOrNull { it.amountInCents }?.takeIf { it > 0 } ?: 1L
+    val categoryColorMap = uiState.categories.associate { it.id to it.colorHex }
+
     Column(modifier = modifier) {
         ImmersiveHeader(title = "Início") {
             MonthHeader(
                 label = uiState.monthLabel,
                 onPreviousMonth = onPreviousMonth,
                 onNextMonth = onNextMonth
+            )
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = MoneyFormatter.format(uiState.summary.paidInCents),
+                style = MaterialTheme.typography.displayLarge,
+                color = Color.White
+            )
+            Text(
+                text = "gasto em ${uiState.monthLabel}",
+                style = MaterialTheme.typography.labelMedium,
+                color = Color.White.copy(alpha = 0.75f)
             )
         }
         LazyColumn(
@@ -65,12 +91,12 @@ fun DashboardScreen(
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-                        SummaryTile("Previsto", uiState.summary.plannedInCents, Modifier.weight(1f))
-                        SummaryTile("Pago", uiState.summary.paidInCents, Modifier.weight(1f))
+                        StatTile("Previsto", uiState.summary.plannedInCents, Blue, Modifier.weight(1f))
+                        StatTile("Pago", uiState.summary.paidInCents, Success, Modifier.weight(1f))
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-                        SummaryTile("Pendente", uiState.summary.pendingInCents, Modifier.weight(1f))
-                        SummaryTile("Vencido", uiState.summary.overdueInCents, Modifier.weight(1f))
+                        StatTile("Pendente", uiState.summary.pendingInCents, Attention, Modifier.weight(1f))
+                        StatTile("Vencido", uiState.summary.overdueInCents, Alert, Modifier.weight(1f))
                     }
                 }
             }
@@ -82,26 +108,113 @@ fun DashboardScreen(
             item {
                 CaptureSummary(uiState.summary.pendingCaptureCount)
             }
+            if (uiState.categoryTotals.isNotEmpty()) {
+                item { SectionTitle("Gastos por categoria") }
+                items(uiState.categoryTotals.take(5), key = { "cat_${it.categoryId ?: "none"}" }) { total ->
+                    CategoryBar(
+                        total = total,
+                        maxAmount = categoryMaxAmount,
+                        colorHex = categoryColorMap[total.categoryId]
+                    )
+                }
+            }
             item {
-                SectionTitle("Proximos vencimentos")
+                SectionTitle("Próximos vencimentos")
             }
             if (uiState.upcomingPayments.isEmpty()) {
-                item { EmptyText("Nada pendente nos proximos dias.") }
+                item { EmptyText("Nada pendente nos próximos dias.") }
             } else {
                 items(uiState.upcomingPayments, key = { it.id }) { payment ->
                     UpcomingPaymentRow(payment = payment, onMarkPaid = onMarkPaid)
                 }
             }
             item {
-                SectionTitle("Recorrencias previstas")
+                SectionTitle("Recorrências previstas")
             }
             if (uiState.recurringOccurrences.isEmpty()) {
-                item { EmptyText("Sem recorrencias previstas para este mes.") }
+                item { EmptyText("Sem recorrências previstas para este mês.") }
             } else {
                 items(uiState.recurringOccurrences, key = { it.ruleId + it.dueDate }) { occurrence ->
                     RecurringOccurrenceRow(occurrence = occurrence, onMarkPaid = onMarkRecurringPaid)
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun StatTile(
+    title: String,
+    amountInCents: Long,
+    accentColor: Color,
+    modifier: Modifier = Modifier
+) {
+    Card(modifier = modifier, shape = MaterialTheme.shapes.small) {
+        Row(modifier = Modifier.height(IntrinsicSize.Min)) {
+            Box(
+                modifier = Modifier
+                    .width(4.dp)
+                    .fillMaxHeight()
+                    .background(accentColor)
+            )
+            Column(
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = MoneyFormatter.format(amountInCents),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun CategoryBar(
+    total: CategoryTotal,
+    maxAmount: Long,
+    colorHex: String?
+) {
+    val barColor = colorHex?.let {
+        runCatching { Color(android.graphics.Color.parseColor(it)) }.getOrNull()
+    } ?: MaterialTheme.colorScheme.primary
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(8.dp)
+                .background(barColor, shape = CircleShape)
+        )
+        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(total.categoryName, style = MaterialTheme.typography.bodyLarge)
+                Text(
+                    MoneyFormatter.format(total.amountInCents),
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+            LinearProgressIndicator(
+                progress = { total.amountInCents.toFloat() / maxAmount.toFloat() },
+                modifier = Modifier.fillMaxWidth(),
+                color = barColor,
+                trackColor = barColor.copy(alpha = 0.12f)
+            )
         }
     }
 }
@@ -166,7 +279,7 @@ fun MonthHeader(
         verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(onClick = onPreviousMonth) {
-            Icon(Icons.Outlined.ChevronLeft, contentDescription = "Mes anterior")
+            Icon(Icons.Outlined.ChevronLeft, contentDescription = "Mês anterior")
         }
         Text(
             text = label,
@@ -174,32 +287,7 @@ fun MonthHeader(
             fontWeight = FontWeight.SemiBold
         )
         IconButton(onClick = onNextMonth) {
-            Icon(Icons.Outlined.ChevronRight, contentDescription = "Proximo mes")
-        }
-    }
-}
-
-@Composable
-private fun SummaryTile(
-    title: String,
-    amountInCents: Long,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        modifier = modifier,
-        shape = RoundedCornerShape(8.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-    ) {
-        Column(
-            modifier = Modifier.padding(14.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            Text(title, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Text(
-                MoneyFormatter.format(amountInCents),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
-            )
+            Icon(Icons.Outlined.ChevronRight, contentDescription = "Próximo mês")
         }
     }
 }
@@ -219,7 +307,11 @@ private fun CaptureSummary(count: Int) {
             Icon(Icons.Outlined.Schedule, contentDescription = null)
             Column {
                 Text("Capturas pendentes", style = MaterialTheme.typography.labelLarge)
-                Text("$count aguardando revisao", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                Text(
+                    "$count aguardando revisão",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
             }
         }
     }

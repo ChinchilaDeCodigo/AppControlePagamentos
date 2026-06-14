@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import com.leona.controlepagamentos.ui.components.ImmersiveHeader
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.OpenInNew
@@ -23,6 +22,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -37,6 +39,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.leona.controlepagamentos.data.model.NotificationSourceEntity
+import com.leona.controlepagamentos.data.preferences.ThemeMode
+import com.leona.controlepagamentos.ui.components.ImmersiveHeader
 import com.leona.controlepagamentos.ui.viewmodel.PaymentsUiState
 
 @Composable
@@ -46,6 +50,7 @@ fun SettingsScreen(
     onSourceEnabled: (NotificationSourceEntity, Boolean) -> Unit,
     onAddSource: (String, String) -> Unit,
     onExportJson: () -> Unit,
+    onThemeChanged: (ThemeMode) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -59,6 +64,9 @@ fun SettingsScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp),
             contentPadding = PaddingValues(start = 16.dp, top = 12.dp, end = 16.dp, bottom = 72.dp)
         ) {
+        item { SectionTitle("Aparência") }
+        item { ThemeSelector(current = uiState.settings.themeMode, onChanged = onThemeChanged) }
+
         item { SectionTitle("Captura") }
         item {
             Card(shape = RoundedCornerShape(8.dp), modifier = Modifier.fillMaxWidth()) {
@@ -89,7 +97,7 @@ fun SettingsScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
-                            Text("Permissao do Android", fontWeight = FontWeight.SemiBold)
+                            Text("Permissão do Android", fontWeight = FontWeight.SemiBold)
                             Text(
                                 if (permissionEnabled) "Concedida" else "Pendente",
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -135,7 +143,7 @@ fun SettingsScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
-                        Text("Exportacao JSON", fontWeight = FontWeight.SemiBold)
+                        Text("Exportação JSON", fontWeight = FontWeight.SemiBold)
                         Text("Backup local", color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                     OutlinedButton(onClick = onExportJson) {
@@ -156,6 +164,37 @@ fun SettingsScreen(
             }
         )
     }
+}
+
+@Composable
+private fun ThemeSelector(current: ThemeMode, onChanged: (ThemeMode) -> Unit) {
+    Card(shape = RoundedCornerShape(8.dp), modifier = Modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier.padding(14.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Text("Tema do app", fontWeight = FontWeight.SemiBold)
+            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+                ThemeMode.entries.forEachIndexed { index, mode ->
+                    SegmentedButton(
+                        selected = current == mode,
+                        onClick = { onChanged(mode) },
+                        shape = SegmentedButtonDefaults.itemShape(
+                            index = index,
+                            count = ThemeMode.entries.size
+                        ),
+                        label = { Text(mode.label()) }
+                    )
+                }
+            }
+        }
+    }
+}
+
+private fun ThemeMode.label() = when (this) {
+    ThemeMode.SYSTEM -> "Sistema"
+    ThemeMode.LIGHT -> "Claro"
+    ThemeMode.DARK -> "Escuro"
 }
 
 @Composable

@@ -12,6 +12,7 @@ import com.leona.controlepagamentos.data.model.PaymentMethod
 import com.leona.controlepagamentos.data.model.PaymentStatus
 import com.leona.controlepagamentos.data.preferences.AppSettings
 import com.leona.controlepagamentos.data.preferences.SettingsDataStore
+import com.leona.controlepagamentos.data.preferences.ThemeMode
 import com.leona.controlepagamentos.data.repository.PaymentRepository
 import com.leona.controlepagamentos.domain.budget.BudgetProgress
 import com.leona.controlepagamentos.domain.budget.BudgetService
@@ -336,6 +337,10 @@ class PaymentsViewModel(
 
     fun setCaptureEnabled(enabled: Boolean) {
         viewModelScope.launch { settingsDataStore.setCaptureEnabled(enabled) }
+    }
+
+    fun setThemeMode(mode: ThemeMode) {
+        viewModelScope.launch { settingsDataStore.setThemeMode(mode) }
     }
 
     fun exportBackup(onExported: (String) -> Unit) {

@@ -27,6 +27,7 @@ import androidx.compose.material3.Text
 import com.leona.controlepagamentos.ui.theme.Alert
 import com.leona.controlepagamentos.ui.theme.Blue
 import com.leona.controlepagamentos.ui.theme.TextTertiary
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -39,6 +40,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.leona.controlepagamentos.data.preferences.ThemeMode
+import com.leona.controlepagamentos.ui.viewmodel.PaymentsUiState
 import com.leona.controlepagamentos.ui.screens.CapturesScreen
 import com.leona.controlepagamentos.ui.screens.DashboardScreen
 import com.leona.controlepagamentos.ui.screens.PaymentsScreen
@@ -61,8 +64,14 @@ class MainActivity : ComponentActivity() {
                     budgetService = app.container.budgetService
                 )
             )
-            ControlePagamentosTheme {
-                PaymentsApp(viewModel = viewModel)
+            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+            val darkTheme = when (uiState.settings.themeMode) {
+                ThemeMode.LIGHT -> false
+                ThemeMode.DARK -> true
+                ThemeMode.SYSTEM -> isSystemInDarkTheme()
+            }
+            ControlePagamentosTheme(darkTheme = darkTheme) {
+                PaymentsApp(viewModel = viewModel, uiState = uiState)
             }
         }
     }
@@ -77,8 +86,7 @@ private enum class MainTab(val label: String) {
 }
 
 @Composable
-private fun PaymentsApp(viewModel: PaymentsViewModel) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+private fun PaymentsApp(viewModel: PaymentsViewModel, uiState: PaymentsUiState) {
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     var selectedTab by rememberSaveable { mutableStateOf(MainTab.DASHBOARD) }
@@ -172,6 +180,7 @@ private fun PaymentsApp(viewModel: PaymentsViewModel) {
                         clipboard.setPrimaryClip(ClipData.newPlainText("controle-pagamentos-backup", json))
                     }
                 },
+                onThemeChanged = viewModel::setThemeMode,
                 modifier = contentModifier
             )
         }
