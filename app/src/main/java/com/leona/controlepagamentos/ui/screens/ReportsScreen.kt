@@ -1,6 +1,8 @@
 package com.leona.controlepagamentos.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -8,11 +10,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import com.leona.controlepagamentos.ui.components.ImmersiveHeader
 import com.leona.controlepagamentos.ui.theme.Alert
 import com.leona.controlepagamentos.ui.theme.Attention
 import com.leona.controlepagamentos.ui.theme.Success
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -169,11 +171,9 @@ private fun BudgetProgressRow(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(budget.name, fontWeight = FontWeight.SemiBold)
-                    Text(
-                        "${budget.categoryName} - ${budget.health.label()}",
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    Text(budget.categoryName, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
+                BudgetHealthBadge(budget.health)
                 Text(
                     "${budget.percentUsed}%",
                     style = MaterialTheme.typography.titleMedium,
@@ -284,11 +284,21 @@ private fun AddBudgetDialog(
     )
 }
 
-private fun BudgetHealth.label(): String = when (this) {
-    BudgetHealth.HEALTHY -> "Saudavel"
-    BudgetHealth.ATTENTION -> "Atencao"
-    BudgetHealth.CRITICAL -> "Critico"
-    BudgetHealth.EXCEEDED -> "Estourado"
+@Composable
+private fun BudgetHealthBadge(health: BudgetHealth) {
+    val (color, label) = when (health) {
+        BudgetHealth.HEALTHY -> Success to "Saudável"
+        BudgetHealth.ATTENTION -> Attention to "Atenção"
+        BudgetHealth.CRITICAL -> Alert to "Crítico"
+        BudgetHealth.EXCEEDED -> Alert to "Estourado"
+    }
+    Box(
+        modifier = Modifier
+            .background(color.copy(alpha = 0.12f), shape = RoundedCornerShape(50))
+            .padding(horizontal = 8.dp, vertical = 3.dp)
+    ) {
+        Text(text = label, style = MaterialTheme.typography.labelSmall, color = color)
+    }
 }
 
 @Composable

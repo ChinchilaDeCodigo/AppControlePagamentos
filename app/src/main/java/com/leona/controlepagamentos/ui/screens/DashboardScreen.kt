@@ -18,6 +18,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.ChevronLeft
@@ -122,7 +124,13 @@ fun DashboardScreen(
                 SectionTitle("Próximos vencimentos")
             }
             if (uiState.upcomingPayments.isEmpty()) {
-                item { EmptyText("Nada pendente nos próximos dias.") }
+                item {
+                    EmptyState(
+                        icon = Icons.Outlined.CheckCircle,
+                        title = "Tudo em dia",
+                        description = "Nenhum vencimento próximo."
+                    )
+                }
             } else {
                 items(uiState.upcomingPayments, key = { it.id }) { payment ->
                     UpcomingPaymentRow(payment = payment, onMarkPaid = onMarkPaid)
@@ -132,7 +140,13 @@ fun DashboardScreen(
                 SectionTitle("Recorrências previstas")
             }
             if (uiState.recurringOccurrences.isEmpty()) {
-                item { EmptyText("Sem recorrências previstas para este mês.") }
+                item {
+                    EmptyState(
+                        icon = Icons.Outlined.Schedule,
+                        title = "Sem recorrências",
+                        description = "Nenhuma recorrência prevista para este mês."
+                    )
+                }
             } else {
                 items(uiState.recurringOccurrences, key = { it.ruleId + it.dueDate }) { occurrence ->
                     RecurringOccurrenceRow(occurrence = occurrence, onMarkPaid = onMarkRecurringPaid)
@@ -376,4 +390,36 @@ fun EmptyText(text: String) {
         modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
         color = MaterialTheme.colorScheme.onSurfaceVariant
     )
+}
+
+@Composable
+fun EmptyState(
+    icon: ImageVector,
+    title: String,
+    description: String,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier.fillMaxWidth().padding(vertical = 32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            modifier = Modifier.size(40.dp),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f)
+        )
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Text(
+            text = description,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.65f),
+            textAlign = TextAlign.Center
+        )
+    }
 }

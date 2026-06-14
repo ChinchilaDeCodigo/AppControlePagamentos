@@ -45,6 +45,7 @@ import com.leona.controlepagamentos.data.model.CategoryEntity
 import com.leona.controlepagamentos.data.model.ParseConfidence
 import com.leona.controlepagamentos.domain.money.MoneyFormatter
 import com.leona.controlepagamentos.ui.components.CategorySelector
+import androidx.compose.material.icons.outlined.NotificationsOff
 import com.leona.controlepagamentos.ui.components.HeaderPill
 import com.leona.controlepagamentos.ui.components.ImmersiveHeader
 import com.leona.controlepagamentos.ui.theme.Alert
@@ -76,7 +77,13 @@ fun CapturesScreen(
             contentPadding = PaddingValues(start = 16.dp, top = 12.dp, end = 16.dp, bottom = 72.dp)
         ) {
             if (uiState.pendingCaptures.isEmpty()) {
-                item { EmptyText("Nenhuma captura aguardando revisão.") }
+                item {
+                    EmptyState(
+                        icon = Icons.Outlined.NotificationsOff,
+                        title = "Tudo revisado",
+                        description = "Nenhuma captura aguardando revisão."
+                    )
+                }
             } else {
                 items(uiState.pendingCaptures, key = { it.id }) { capture ->
                     ReviewCard(

@@ -46,6 +46,7 @@ import com.leona.controlepagamentos.data.model.PaymentEntity
 import com.leona.controlepagamentos.data.model.PaymentMethod
 import com.leona.controlepagamentos.data.model.PaymentStatus
 import com.leona.controlepagamentos.domain.recurrence.RecurringOccurrence
+import com.leona.controlepagamentos.domain.money.MoneyFormatter
 import com.leona.controlepagamentos.ui.components.AmountText
 import com.leona.controlepagamentos.ui.components.CategorySelector
 import com.leona.controlepagamentos.ui.components.PaymentMethodSelector
@@ -90,15 +91,12 @@ fun PaymentsScreen(
 
             val grouped = uiState.payments.groupBy { it.dueDate }.toSortedMap()
             if (grouped.isEmpty() && uiState.recurringOccurrences.isEmpty()) {
-                item { EmptyText("Nenhum pagamento neste mes.") }
+                item { EmptyText("Nenhum pagamento neste mês.") }
             } else {
                 grouped.forEach { (date, payments) ->
-                    item {
-                        Text(
-                            text = date.shortDate(),
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.SemiBold
-                        )
+                    val dailyTotal = payments.sumOf { it.amountInCents }
+                    item(key = "header_$date") {
+                        DayHeader(date = date, totalInCents = dailyTotal)
                     }
                     items(payments, key = { it.id }) { payment ->
                         PaymentRow(payment = payment, onMarkPaid = onMarkPaid)
@@ -106,7 +104,7 @@ fun PaymentsScreen(
                 }
 
                 if (uiState.recurringOccurrences.isNotEmpty()) {
-                    item { SectionTitle("Previstos por recorrencia") }
+                    item { SectionTitle("Previstos por recorrência") }
                     items(uiState.recurringOccurrences, key = { it.ruleId + it.dueDate }) { occurrence ->
                         RecurringPaymentRow(occurrence = occurrence, onMarkPaid = onMarkRecurringPaid)
                     }
@@ -214,6 +212,26 @@ private fun RecurringPaymentRow(
                 Text("Pagar")
             }
         }
+    }
+}
+
+@Composable
+private fun DayHeader(date: LocalDate, totalInCents: Long) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = date.shortDate(),
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.SemiBold
+        )
+        Text(
+            text = MoneyFormatter.format(totalInCents),
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 
