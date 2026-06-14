@@ -350,7 +350,7 @@ class PaymentsViewModel(
                     onExported(it)
                     errorMessage.value = "Backup JSON copiado."
                 }
-                .onFailure { errorMessage.value = it.message ?: "Nao foi possivel exportar." }
+                .onFailure { errorMessage.value = it.message ?: "Não foi possível exportar." }
         }
     }
 
@@ -361,7 +361,7 @@ class PaymentsViewModel(
     private fun runValidated(block: suspend () -> Unit) {
         viewModelScope.launch {
             runCatching { block() }
-                .onFailure { errorMessage.value = it.message ?: "Nao foi possivel salvar." }
+                .onFailure { errorMessage.value = it.message ?: "Não foi possível salvar." }
         }
     }
 

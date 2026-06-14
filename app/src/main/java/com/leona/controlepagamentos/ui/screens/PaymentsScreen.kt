@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import com.leona.controlepagamentos.ui.components.ImmersiveHeader
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -39,16 +38,19 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.leona.controlepagamentos.R
 import com.leona.controlepagamentos.data.model.CategoryEntity
 import com.leona.controlepagamentos.data.model.PaymentEntity
 import com.leona.controlepagamentos.data.model.PaymentMethod
 import com.leona.controlepagamentos.data.model.PaymentStatus
-import com.leona.controlepagamentos.domain.recurrence.RecurringOccurrence
 import com.leona.controlepagamentos.domain.money.MoneyFormatter
+import com.leona.controlepagamentos.domain.recurrence.RecurringOccurrence
 import com.leona.controlepagamentos.ui.components.AmountText
 import com.leona.controlepagamentos.ui.components.CategorySelector
+import com.leona.controlepagamentos.ui.components.ImmersiveHeader
 import com.leona.controlepagamentos.ui.components.PaymentMethodSelector
 import com.leona.controlepagamentos.ui.components.label
 import com.leona.controlepagamentos.ui.components.shortDate
@@ -73,7 +75,7 @@ fun PaymentsScreen(
 
     Box(modifier = modifier) {
         Column(modifier = Modifier.fillMaxSize()) {
-            ImmersiveHeader(title = "Pagamentos") {
+            ImmersiveHeader(title = stringResource(R.string.screen_payments)) {
                 MonthHeader(
                     label = uiState.monthLabel,
                     onPreviousMonth = onPreviousMonth,
@@ -91,7 +93,7 @@ fun PaymentsScreen(
 
             val grouped = uiState.payments.groupBy { it.dueDate }.toSortedMap()
             if (grouped.isEmpty() && uiState.recurringOccurrences.isEmpty()) {
-                item { EmptyText("Nenhum pagamento neste mês.") }
+                item { EmptyText(stringResource(R.string.empty_payments)) }
             } else {
                 grouped.forEach { (date, payments) ->
                     val dailyTotal = payments.sumOf { it.amountInCents }
@@ -104,7 +106,7 @@ fun PaymentsScreen(
                 }
 
                 if (uiState.recurringOccurrences.isNotEmpty()) {
-                    item { SectionTitle("Previstos por recorrência") }
+                    item { SectionTitle(stringResource(R.string.section_recurring_payments)) }
                     items(uiState.recurringOccurrences, key = { it.ruleId + it.dueDate }) { occurrence ->
                         RecurringPaymentRow(occurrence = occurrence, onMarkPaid = onMarkRecurringPaid)
                     }
@@ -116,7 +118,7 @@ fun PaymentsScreen(
         ExtendedFloatingActionButton(
             onClick = { showForm = true },
             icon = { Icon(Icons.Outlined.Add, contentDescription = null) },
-            text = { Text("Novo") },
+            text = { Text(stringResource(R.string.action_new)) },
             modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp)
         )
     }
@@ -144,10 +146,10 @@ fun PaymentsScreen(
 @Composable
 private fun PaymentFilterRow(selected: PaymentFilter, onSelected: (PaymentFilter) -> Unit) {
     val labels = mapOf(
-        PaymentFilter.ALL to "Todos",
-        PaymentFilter.PENDING to "Pendentes",
-        PaymentFilter.PAID to "Pagos",
-        PaymentFilter.OVERDUE to "Vencidos"
+        PaymentFilter.ALL to stringResource(R.string.filter_all),
+        PaymentFilter.PENDING to stringResource(R.string.filter_pending),
+        PaymentFilter.PAID to stringResource(R.string.filter_paid),
+        PaymentFilter.OVERDUE to stringResource(R.string.filter_overdue)
     )
     LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         items(PaymentFilter.entries, key = { it.name }) { filter ->
@@ -185,7 +187,7 @@ private fun PaymentRow(payment: PaymentEntity, onMarkPaid: (String) -> Unit) {
             AmountText(payment.amountInCents)
             if (payment.status == PaymentStatus.PENDING) {
                 IconButton(onClick = { onMarkPaid(payment.id) }) {
-                    Icon(Icons.Outlined.CheckCircle, contentDescription = "Marcar pago")
+                    Icon(Icons.Outlined.CheckCircle, contentDescription = stringResource(R.string.action_mark_paid))
                 }
             }
         }
@@ -205,11 +207,14 @@ private fun RecurringPaymentRow(
         ) {
             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(occurrence.title, fontWeight = FontWeight.SemiBold)
-                Text("${occurrence.dueDate.shortDate()} - Recorrente", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(
+                    "${occurrence.dueDate.shortDate()} - ${stringResource(R.string.label_recurring)}",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
             AmountText(occurrence.amountInCents)
             OutlinedButton(onClick = { onMarkPaid(occurrence) }) {
-                Text("Pagar")
+                Text(stringResource(R.string.action_pay))
             }
         }
     }
@@ -261,7 +266,7 @@ private fun AddPaymentDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Novo pagamento") },
+        title = { Text(stringResource(R.string.dialog_new_payment)) },
         text = {
             Column(
                 modifier = Modifier.verticalScroll(rememberScrollState()),
@@ -272,35 +277,40 @@ private fun AddPaymentDialog(
                         FilterChip(
                             selected = mode == PaymentFormMode.SINGLE,
                             onClick = { mode = PaymentFormMode.SINGLE },
-                            label = { Text("Unico") }
+                            label = { Text(stringResource(R.string.payment_mode_single)) }
                         )
                     }
                     item {
                         FilterChip(
                             selected = mode == PaymentFormMode.INSTALLMENT,
                             onClick = { mode = PaymentFormMode.INSTALLMENT },
-                            label = { Text("Parcelado") }
+                            label = { Text(stringResource(R.string.payment_mode_installment)) }
                         )
                     }
                     item {
                         FilterChip(
                             selected = mode == PaymentFormMode.RECURRING,
                             onClick = { mode = PaymentFormMode.RECURRING },
-                            label = { Text("Recorrente") }
+                            label = { Text(stringResource(R.string.payment_mode_recurring)) }
                         )
                     }
                 }
                 OutlinedTextField(
                     value = title,
                     onValueChange = { title = it },
-                    label = { Text("Titulo") },
+                    label = { Text(stringResource(R.string.form_title)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
                 OutlinedTextField(
                     value = amount,
                     onValueChange = { amount = it },
-                    label = { Text(if (mode == PaymentFormMode.INSTALLMENT) "Valor total" else "Valor") },
+                    label = {
+                        Text(
+                            if (mode == PaymentFormMode.INSTALLMENT) stringResource(R.string.form_total_amount)
+                            else stringResource(R.string.form_amount)
+                        )
+                    },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -309,7 +319,7 @@ private fun AddPaymentDialog(
                         OutlinedTextField(
                             value = date,
                             onValueChange = { date = it },
-                            label = { Text("Vencimento AAAA-MM-DD") },
+                            label = { Text(stringResource(R.string.form_due_date)) },
                             singleLine = true,
                             modifier = Modifier.fillMaxWidth()
                         )
@@ -318,14 +328,14 @@ private fun AddPaymentDialog(
                         OutlinedTextField(
                             value = installments,
                             onValueChange = { installments = it },
-                            label = { Text("Parcelas") },
+                            label = { Text(stringResource(R.string.form_installments)) },
                             singleLine = true,
                             modifier = Modifier.fillMaxWidth()
                         )
                         OutlinedTextField(
                             value = date,
                             onValueChange = { date = it },
-                            label = { Text("Primeira parcela AAAA-MM-DD") },
+                            label = { Text(stringResource(R.string.form_first_installment)) },
                             singleLine = true,
                             modifier = Modifier.fillMaxWidth()
                         )
@@ -334,14 +344,14 @@ private fun AddPaymentDialog(
                         OutlinedTextField(
                             value = dayOfMonth,
                             onValueChange = { dayOfMonth = it },
-                            label = { Text("Dia do mes") },
+                            label = { Text(stringResource(R.string.form_day_of_month)) },
                             singleLine = true,
                             modifier = Modifier.fillMaxWidth()
                         )
                         OutlinedTextField(
                             value = date,
                             onValueChange = { date = it },
-                            label = { Text("Inicio AAAA-MM-DD") },
+                            label = { Text(stringResource(R.string.form_start_date)) },
                             singleLine = true,
                             modifier = Modifier.fillMaxWidth()
                         )
@@ -352,7 +362,7 @@ private fun AddPaymentDialog(
                 OutlinedTextField(
                     value = notes,
                     onValueChange = { notes = it },
-                    label = { Text("Observacoes") },
+                    label = { Text(stringResource(R.string.form_notes)) },
                     minLines = 2,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -369,12 +379,12 @@ private fun AddPaymentDialog(
                     }
                 }
             ) {
-                Text("Salvar")
+                Text(stringResource(R.string.action_save))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancelar")
+                Text(stringResource(R.string.action_cancel))
             }
         }
     )

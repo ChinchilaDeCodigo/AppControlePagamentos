@@ -29,17 +29,17 @@ fun CaptureStatus.label(): String = when (this) {
 
 fun ParseConfidence.label(): String = when (this) {
     ParseConfidence.HIGH -> "Alta"
-    ParseConfidence.MEDIUM -> "Media"
+    ParseConfidence.MEDIUM -> "Média"
     ParseConfidence.LOW -> "Baixa"
     ParseConfidence.FAILED -> "Falhou"
 }
 
 fun PaymentMethod.label(): String = when (this) {
     PaymentMethod.CASH -> "Dinheiro"
-    PaymentMethod.CREDIT_CARD -> "Credito"
-    PaymentMethod.DEBIT_CARD -> "Debito"
+    PaymentMethod.CREDIT_CARD -> "Crédito"
+    PaymentMethod.DEBIT_CARD -> "Débito"
     PaymentMethod.PIX -> "Pix"
     PaymentMethod.BANK_SLIP -> "Boleto"
-    PaymentMethod.TRANSFER -> "Transferencia"
+    PaymentMethod.TRANSFER -> "Transferência"
     PaymentMethod.OTHER -> "Outro"
 }

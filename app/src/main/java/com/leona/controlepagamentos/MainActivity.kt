@@ -37,6 +37,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -77,12 +78,12 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-private enum class MainTab(val label: String) {
-    DASHBOARD("Dashboard"),
-    PAYMENTS("Pagamentos"),
-    CAPTURES("Capturados"),
-    REPORTS("Relatorios"),
-    SETTINGS("Ajustes")
+private enum class MainTab {
+    DASHBOARD,
+    PAYMENTS,
+    CAPTURES,
+    REPORTS,
+    SETTINGS
 }
 
 @Composable
@@ -118,13 +119,13 @@ private fun PaymentsApp(viewModel: PaymentsViewModel, uiState: PaymentsUiState) 
                                         Text(uiState.pendingCaptures.size.toString())
                                     }
                                 }) {
-                                    Icon(tab.icon(), contentDescription = tab.label)
+                                    Icon(tab.icon(), contentDescription = tab.label())
                                 }
                             } else {
-                                Icon(tab.icon(), contentDescription = tab.label)
+                                Icon(tab.icon(), contentDescription = tab.label())
                             }
                         },
-                        label = { Text(tab.label) },
+                        label = { Text(tab.label(), softWrap = false) },
                         colors = navColors
                     )
                 }
@@ -185,6 +186,15 @@ private fun PaymentsApp(viewModel: PaymentsViewModel, uiState: PaymentsUiState) 
             )
         }
     }
+}
+
+@Composable
+private fun MainTab.label() = when (this) {
+    MainTab.DASHBOARD -> stringResource(R.string.nav_dashboard)
+    MainTab.PAYMENTS -> stringResource(R.string.nav_payments)
+    MainTab.CAPTURES -> stringResource(R.string.nav_captures)
+    MainTab.REPORTS -> stringResource(R.string.nav_reports)
+    MainTab.SETTINGS -> stringResource(R.string.nav_settings)
 }
 
 @Composable

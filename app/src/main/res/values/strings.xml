@@ -1,5 +1,150 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- App -->
     <string name="app_name">Controle de Pagamentos</string>
     <string name="notification_listener_label">Captura de pagamentos</string>
+
+    <!-- Navigation bar -->
+    <string name="nav_dashboard">Dashboard</string>
+    <string name="nav_payments">Pagamentos</string>
+    <string name="nav_captures">Capturados</string>
+    <string name="nav_reports">Relatórios</string>
+    <string name="nav_settings">Ajustes</string>
+
+    <!-- Screen headers -->
+    <string name="screen_dashboard">Início</string>
+    <string name="screen_payments">Pagamentos</string>
+    <string name="screen_captures">Capturados</string>
+    <string name="screen_reports">Relatórios</string>
+    <string name="screen_settings">Ajustes</string>
+
+    <!-- Month navigation -->
+    <string name="nav_previous_month">Mês anterior</string>
+    <string name="nav_next_month">Próximo mês</string>
+    <string name="dashboard_spent_in_month">gasto em %s</string>
+
+    <!-- Summary / stat labels -->
+    <string name="label_planned">Previsto</string>
+    <string name="label_paid">Pago</string>
+    <string name="label_pending">Pendente</string>
+    <string name="label_overdue">Vencido</string>
+    <string name="label_monthly_budget">Teto mensal</string>
+    <string name="label_no_category">Sem categoria</string>
+    <string name="label_no_data">Sem dados</string>
+    <string name="label_captured">Capturado</string>
+    <string name="label_manual">Manual</string>
+    <string name="label_recurring">Recorrente</string>
+    <string name="label_remaining_amount">Restante: %s</string>
+    <string name="label_spent_of_limit">%1$s de %2$s</string>
+    <string name="label_top_category_with_share">%1$s (%2$d%%)</string>
+
+    <!-- Section titles -->
+    <string name="section_monthly_summary">Resumo do mês</string>
+    <string name="section_spending_by_category">Gastos por categoria</string>
+    <string name="section_upcoming_payments">Próximos vencimentos</string>
+    <string name="section_recurring">Recorrências previstas</string>
+    <string name="section_recurring_payments">Previstos por recorrência</string>
+    <string name="section_spending_caps">Tetos de gastos</string>
+    <string name="section_appearance">Aparência</string>
+    <string name="section_capture">Captura</string>
+    <string name="section_monitored_apps">Apps monitorados</string>
+    <string name="section_backup">Backup</string>
+
+    <!-- Captures -->
+    <string name="captures_pending_title">Capturas pendentes</string>
+    <string name="captures_pending_count">%d aguardando revisão</string>
+    <string name="captures_in_queue">%d na fila</string>
+    <string name="capture_unknown_merchant">Estabelecimento desconhecido</string>
+
+    <!-- Confidence levels -->
+    <string name="confidence_high">Alta confiança</string>
+    <string name="confidence_medium">Média confiança</string>
+    <string name="confidence_low">Baixa confiança</string>
+    <string name="confidence_failed">Falhou</string>
+
+    <!-- Budget health -->
+    <string name="health_healthy">Saudável</string>
+    <string name="health_attention">Atenção</string>
+    <string name="health_critical">Crítico</string>
+    <string name="health_exceeded">Estourado</string>
+
+    <!-- Payment filters -->
+    <string name="filter_all">Todos</string>
+    <string name="filter_pending">Pendentes</string>
+    <string name="filter_paid">Pagos</string>
+    <string name="filter_overdue">Vencidos</string>
+
+    <!-- Payment modes -->
+    <string name="payment_mode_single">Único</string>
+    <string name="payment_mode_installment">Parcelado</string>
+    <string name="payment_mode_recurring">Recorrente</string>
+
+    <!-- Insight tiles -->
+    <string name="insight_daily_average">Média diária</string>
+    <string name="insight_projection">Projeção</string>
+    <string name="insight_top_category">Maior categoria</string>
+
+    <!-- Theme -->
+    <string name="setting_theme_title">Tema do app</string>
+    <string name="theme_system">Sistema</string>
+    <string name="theme_light">Claro</string>
+    <string name="theme_dark">Escuro</string>
+
+    <!-- Settings -->
+    <string name="setting_capture_enabled_title">Captura habilitada</string>
+    <string name="capture_status_active">Ativa</string>
+    <string name="capture_status_inactive">Inativa</string>
+    <string name="setting_notification_permission_title">Permissão do Android</string>
+    <string name="permission_granted">Concedida</string>
+    <string name="setting_json_export_title">Exportação JSON</string>
+    <string name="setting_json_export_desc">Backup local</string>
+
+    <!-- Empty states -->
+    <string name="empty_upcoming_title">Tudo em dia</string>
+    <string name="empty_upcoming_desc">Nenhum vencimento próximo.</string>
+    <string name="empty_recurring_title">Sem recorrências</string>
+    <string name="empty_recurring_desc">Nenhuma recorrência prevista para este mês.</string>
+    <string name="empty_captures_title">Tudo revisado</string>
+    <string name="empty_captures_desc">Nenhuma captura aguardando revisão.</string>
+    <string name="empty_payments">Nenhum pagamento neste mês.</string>
+    <string name="empty_budgets">Nenhum teto configurado para este mês.</string>
+    <string name="empty_category_totals">Sem pagamentos pagos neste mês.</string>
+
+    <!-- Actions -->
+    <string name="action_confirm">Confirmar</string>
+    <string name="action_cancel">Cancelar</string>
+    <string name="action_save">Salvar</string>
+    <string name="action_add">Adicionar</string>
+    <string name="action_export">Exportar</string>
+    <string name="action_open">Abrir</string>
+    <string name="action_new">Novo</string>
+    <string name="action_pay">Pagar</string>
+    <string name="action_mark_paid">Marcar pago</string>
+    <string name="action_clear">Limpar</string>
+    <string name="action_remove_budget">Remover teto</string>
+
+    <!-- Dialog titles -->
+    <string name="dialog_review_capture">Revisar captura</string>
+    <string name="dialog_new_payment">Novo pagamento</string>
+    <string name="dialog_new_budget">Novo teto</string>
+    <string name="dialog_add_app">Adicionar app</string>
+
+    <!-- Form fields -->
+    <string name="form_merchant">Estabelecimento</string>
+    <string name="form_amount">Valor</string>
+    <string name="form_total_amount">Valor total</string>
+    <string name="form_notes">Observações</string>
+    <string name="form_title">Título</string>
+    <string name="form_due_date">Vencimento AAAA-MM-DD</string>
+    <string name="form_installments">Parcelas</string>
+    <string name="form_first_installment">Primeira parcela AAAA-MM-DD</string>
+    <string name="form_day_of_month">Dia do mês</string>
+    <string name="form_start_date">Início AAAA-MM-DD</string>
+    <string name="form_name">Nome</string>
+    <string name="form_limit_amount">Valor limite</string>
+    <string name="form_alert_percent">Alertar em %</string>
+    <string name="form_package">Pacote</string>
+    <string name="form_category">Categoria</string>
+    <string name="form_payment_method">Forma de pagamento</string>
+    <string name="form_not_defined">Não definida</string>
 </resources>

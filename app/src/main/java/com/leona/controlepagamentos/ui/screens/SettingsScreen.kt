@@ -36,8 +36,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.leona.controlepagamentos.R
 import com.leona.controlepagamentos.data.model.NotificationSourceEntity
 import com.leona.controlepagamentos.data.preferences.ThemeMode
 import com.leona.controlepagamentos.ui.components.ImmersiveHeader
@@ -58,16 +60,16 @@ fun SettingsScreen(
     val permissionEnabled = isNotificationListenerEnabled(context)
 
     Column(modifier = modifier) {
-        ImmersiveHeader(title = "Ajustes")
+        ImmersiveHeader(title = stringResource(R.string.screen_settings))
         LazyColumn(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(12.dp),
             contentPadding = PaddingValues(start = 16.dp, top = 12.dp, end = 16.dp, bottom = 72.dp)
         ) {
-        item { SectionTitle("Aparência") }
+        item { SectionTitle(stringResource(R.string.section_appearance)) }
         item { ThemeSelector(current = uiState.settings.themeMode, onChanged = onThemeChanged) }
 
-        item { SectionTitle("Captura") }
+        item { SectionTitle(stringResource(R.string.section_capture)) }
         item {
             Card(shape = RoundedCornerShape(8.dp), modifier = Modifier.fillMaxWidth()) {
                 Column(
@@ -80,9 +82,10 @@ fun SettingsScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
-                            Text("Captura habilitada", fontWeight = FontWeight.SemiBold)
+                            Text(stringResource(R.string.setting_capture_enabled_title), fontWeight = FontWeight.SemiBold)
                             Text(
-                                if (uiState.settings.captureEnabled) "Ativa" else "Inativa",
+                                if (uiState.settings.captureEnabled) stringResource(R.string.capture_status_active)
+                                else stringResource(R.string.capture_status_inactive),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
@@ -97,9 +100,10 @@ fun SettingsScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
-                            Text("Permissão do Android", fontWeight = FontWeight.SemiBold)
+                            Text(stringResource(R.string.setting_notification_permission_title), fontWeight = FontWeight.SemiBold)
                             Text(
-                                if (permissionEnabled) "Concedida" else "Pendente",
+                                if (permissionEnabled) stringResource(R.string.permission_granted)
+                                else stringResource(R.string.label_pending),
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
@@ -109,7 +113,7 @@ fun SettingsScreen(
                             }
                         ) {
                             Icon(Icons.AutoMirrored.Outlined.OpenInNew, contentDescription = null)
-                            Text("Abrir")
+                            Text(stringResource(R.string.action_open))
                         }
                     }
                 }
@@ -122,10 +126,10 @@ fun SettingsScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                SectionTitle("Apps monitorados")
+                SectionTitle(stringResource(R.string.section_monitored_apps))
                 FilledTonalButton(onClick = { showSourceDialog = true }) {
                     Icon(Icons.Outlined.Add, contentDescription = null)
-                    Text("Adicionar")
+                    Text(stringResource(R.string.action_add))
                 }
             }
         }
@@ -134,7 +138,7 @@ fun SettingsScreen(
             SourceRow(source = source, onEnabled = { enabled -> onSourceEnabled(source, enabled) })
         }
 
-        item { SectionTitle("Backup") }
+        item { SectionTitle(stringResource(R.string.section_backup)) }
         item {
             Card(shape = RoundedCornerShape(8.dp), modifier = Modifier.fillMaxWidth()) {
                 Row(
@@ -143,11 +147,11 @@ fun SettingsScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
-                        Text("Exportação JSON", fontWeight = FontWeight.SemiBold)
-                        Text("Backup local", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(stringResource(R.string.setting_json_export_title), fontWeight = FontWeight.SemiBold)
+                        Text(stringResource(R.string.setting_json_export_desc), color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                     OutlinedButton(onClick = onExportJson) {
-                        Text("Exportar")
+                        Text(stringResource(R.string.action_export))
                     }
                 }
             }
@@ -173,7 +177,7 @@ private fun ThemeSelector(current: ThemeMode, onChanged: (ThemeMode) -> Unit) {
             modifier = Modifier.padding(14.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            Text("Tema do app", fontWeight = FontWeight.SemiBold)
+            Text(stringResource(R.string.setting_theme_title), fontWeight = FontWeight.SemiBold)
             SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
                 ThemeMode.entries.forEachIndexed { index, mode ->
                     SegmentedButton(
@@ -191,10 +195,11 @@ private fun ThemeSelector(current: ThemeMode, onChanged: (ThemeMode) -> Unit) {
     }
 }
 
+@Composable
 private fun ThemeMode.label() = when (this) {
-    ThemeMode.SYSTEM -> "Sistema"
-    ThemeMode.LIGHT -> "Claro"
-    ThemeMode.DARK -> "Escuro"
+    ThemeMode.SYSTEM -> stringResource(R.string.theme_system)
+    ThemeMode.LIGHT -> stringResource(R.string.theme_light)
+    ThemeMode.DARK -> stringResource(R.string.theme_dark)
 }
 
 @Composable
@@ -227,20 +232,20 @@ private fun AddSourceDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Adicionar app") },
+        title = { Text(stringResource(R.string.dialog_add_app)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedTextField(
                     value = appName,
                     onValueChange = { appName = it },
-                    label = { Text("Nome") },
+                    label = { Text(stringResource(R.string.form_name)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
                 OutlinedTextField(
                     value = packageName,
                     onValueChange = { packageName = it },
-                    label = { Text("Pacote") },
+                    label = { Text(stringResource(R.string.form_package)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -248,12 +253,12 @@ private fun AddSourceDialog(
         },
         confirmButton = {
             TextButton(onClick = { onAdd(packageName, appName) }) {
-                Text("Adicionar")
+                Text(stringResource(R.string.action_add))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancelar")
+                Text(stringResource(R.string.action_cancel))
             }
         }
     )

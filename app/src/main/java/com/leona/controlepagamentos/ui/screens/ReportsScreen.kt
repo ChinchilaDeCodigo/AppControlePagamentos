@@ -11,10 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import com.leona.controlepagamentos.ui.components.ImmersiveHeader
-import com.leona.controlepagamentos.ui.theme.Alert
-import com.leona.controlepagamentos.ui.theme.Attention
-import com.leona.controlepagamentos.ui.theme.Success
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -37,13 +33,19 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.leona.controlepagamentos.R
 import com.leona.controlepagamentos.data.model.CategoryEntity
 import com.leona.controlepagamentos.domain.budget.BudgetHealth
 import com.leona.controlepagamentos.domain.budget.BudgetProgress
 import com.leona.controlepagamentos.domain.money.MoneyFormatter
 import com.leona.controlepagamentos.ui.components.CategorySelector
+import com.leona.controlepagamentos.ui.components.ImmersiveHeader
+import com.leona.controlepagamentos.ui.theme.Alert
+import com.leona.controlepagamentos.ui.theme.Attention
+import com.leona.controlepagamentos.ui.theme.Success
 import com.leona.controlepagamentos.ui.viewmodel.CategoryTotal
 import com.leona.controlepagamentos.ui.viewmodel.PaymentsUiState
 
@@ -58,13 +60,13 @@ fun ReportsScreen(
     val maxAmount = uiState.categoryTotals.maxOfOrNull { it.amountInCents }?.takeIf { it > 0 } ?: 1L
 
     Column(modifier = modifier) {
-        ImmersiveHeader(title = "Relatórios")
+        ImmersiveHeader(title = stringResource(R.string.screen_reports))
         LazyColumn(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(12.dp),
             contentPadding = PaddingValues(start = 16.dp, top = 12.dp, end = 16.dp, bottom = 72.dp)
         ) {
-        item { SectionTitle("Resumo do mes") }
+        item { SectionTitle(stringResource(R.string.section_monthly_summary)) }
         item { InsightGrid(uiState) }
 
         item {
@@ -73,15 +75,15 @@ fun ReportsScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                SectionTitle("Tetos de gastos")
+                SectionTitle(stringResource(R.string.section_spending_caps))
                 FilledTonalButton(onClick = { showBudgetDialog = true }) {
                     Icon(Icons.Outlined.Add, contentDescription = null)
-                    Text("Novo")
+                    Text(stringResource(R.string.action_new))
                 }
             }
         }
         if (uiState.budgetProgress.isEmpty()) {
-            item { EmptyText("Nenhum teto configurado para este mes.") }
+            item { EmptyText(stringResource(R.string.empty_budgets)) }
         } else {
             items(uiState.budgetProgress, key = { it.budgetId }) { budget ->
                 BudgetProgressRow(
@@ -91,9 +93,9 @@ fun ReportsScreen(
             }
         }
 
-        item { SectionTitle("Gastos por categoria") }
+        item { SectionTitle(stringResource(R.string.section_spending_by_category)) }
         if (uiState.categoryTotals.isEmpty()) {
-            item { EmptyText("Sem pagamentos pagos neste mes.") }
+            item { EmptyText(stringResource(R.string.empty_category_totals)) }
         } else {
             items(uiState.categoryTotals, key = { it.categoryId ?: "none" }) { total ->
                 CategoryTotalRow(total = total, maxAmount = maxAmount)
@@ -119,20 +121,22 @@ private fun InsightGrid(uiState: PaymentsUiState) {
     val insight = uiState.spendingInsight
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-            InsightTile("Pago", MoneyFormatter.format(insight.paidInCents), Modifier.weight(1f))
-            InsightTile("Media diaria", MoneyFormatter.format(insight.averageDailyInCents), Modifier.weight(1f))
+            InsightTile(stringResource(R.string.label_paid), MoneyFormatter.format(insight.paidInCents), Modifier.weight(1f))
+            InsightTile(stringResource(R.string.insight_daily_average), MoneyFormatter.format(insight.averageDailyInCents), Modifier.weight(1f))
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-            InsightTile("Projecao", MoneyFormatter.format(insight.projectedMonthInCents), Modifier.weight(1f))
+            InsightTile(stringResource(R.string.insight_projection), MoneyFormatter.format(insight.projectedMonthInCents), Modifier.weight(1f))
             InsightTile(
-                "Maior categoria",
-                insight.topCategoryName?.let { "$it (${insight.topCategorySharePercent}%)" } ?: "Sem dados",
+                stringResource(R.string.insight_top_category),
+                insight.topCategoryName?.let {
+                    stringResource(R.string.label_top_category_with_share, it, insight.topCategorySharePercent)
+                } ?: stringResource(R.string.label_no_data),
                 Modifier.weight(1f)
             )
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-            InsightTile("Capturado", MoneyFormatter.format(insight.capturedInCents), Modifier.weight(1f))
-            InsightTile("Manual", MoneyFormatter.format(insight.manualInCents), Modifier.weight(1f))
+            InsightTile(stringResource(R.string.label_captured), MoneyFormatter.format(insight.capturedInCents), Modifier.weight(1f))
+            InsightTile(stringResource(R.string.label_manual), MoneyFormatter.format(insight.manualInCents), Modifier.weight(1f))
         }
     }
 }
@@ -181,7 +185,7 @@ private fun BudgetProgressRow(
                     color = budget.health.color()
                 )
                 IconButton(onClick = onDeactivate) {
-                    Icon(Icons.Outlined.Delete, contentDescription = "Remover teto")
+                    Icon(Icons.Outlined.Delete, contentDescription = stringResource(R.string.action_remove_budget))
                 }
             }
             LinearProgressIndicator(
@@ -190,11 +194,15 @@ private fun BudgetProgressRow(
                 color = budget.health.color()
             )
             Text(
-                "${MoneyFormatter.format(budget.spentInCents)} de ${MoneyFormatter.format(budget.limitInCents)}",
+                stringResource(
+                    R.string.label_spent_of_limit,
+                    MoneyFormatter.format(budget.spentInCents),
+                    MoneyFormatter.format(budget.limitInCents)
+                ),
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Text(
-                "Restante: ${MoneyFormatter.format(budget.remainingInCents)}",
+                stringResource(R.string.label_remaining_amount, MoneyFormatter.format(budget.remainingInCents)),
                 color = budget.health.color()
             )
         }
@@ -237,7 +245,7 @@ private fun AddBudgetDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Novo teto") },
+        title = { Text(stringResource(R.string.dialog_new_budget)) },
         text = {
             Column(
                 modifier = Modifier.verticalScroll(rememberScrollState()),
@@ -246,21 +254,21 @@ private fun AddBudgetDialog(
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text("Nome") },
+                    label = { Text(stringResource(R.string.form_name)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
                 OutlinedTextField(
                     value = amount,
                     onValueChange = { amount = it },
-                    label = { Text("Valor limite") },
+                    label = { Text(stringResource(R.string.form_limit_amount)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
                 OutlinedTextField(
                     value = alertAt,
                     onValueChange = { alertAt = it },
-                    label = { Text("Alertar em %") },
+                    label = { Text(stringResource(R.string.form_alert_percent)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -273,12 +281,12 @@ private fun AddBudgetDialog(
         },
         confirmButton = {
             TextButton(onClick = { onSave(name, amount, selectedCategory, alertAt) }) {
-                Text("Salvar")
+                Text(stringResource(R.string.action_save))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancelar")
+                Text(stringResource(R.string.action_cancel))
             }
         }
     )
@@ -287,10 +295,10 @@ private fun AddBudgetDialog(
 @Composable
 private fun BudgetHealthBadge(health: BudgetHealth) {
     val (color, label) = when (health) {
-        BudgetHealth.HEALTHY -> Success to "Saudável"
-        BudgetHealth.ATTENTION -> Attention to "Atenção"
-        BudgetHealth.CRITICAL -> Alert to "Crítico"
-        BudgetHealth.EXCEEDED -> Alert to "Estourado"
+        BudgetHealth.HEALTHY -> Success to stringResource(R.string.health_healthy)
+        BudgetHealth.ATTENTION -> Attention to stringResource(R.string.health_attention)
+        BudgetHealth.CRITICAL -> Alert to stringResource(R.string.health_critical)
+        BudgetHealth.EXCEEDED -> Alert to stringResource(R.string.health_exceeded)
     }
     Box(
         modifier = Modifier

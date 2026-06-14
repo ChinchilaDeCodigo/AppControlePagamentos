@@ -13,8 +13,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.leona.controlepagamentos.R
 import com.leona.controlepagamentos.data.model.CategoryEntity
 import com.leona.controlepagamentos.data.model.PaymentMethod
 import com.leona.controlepagamentos.domain.money.MoneyFormatter
@@ -41,7 +43,7 @@ fun CategorySelector(
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
-            text = "Categoria",
+            text = stringResource(R.string.form_category),
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -54,7 +56,7 @@ fun CategorySelector(
                 FilterChip(
                     selected = selectedCategoryId == null,
                     onClick = { onSelected(null) },
-                    label = { Text("Sem categoria") }
+                    label = { Text(stringResource(R.string.label_no_category)) }
                 )
             }
             items(categories, key = { it.id }) { category ->
@@ -76,7 +78,7 @@ fun PaymentMethodSelector(
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
-            text = "Forma de pagamento",
+            text = stringResource(R.string.form_payment_method),
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -88,7 +90,12 @@ fun PaymentMethodSelector(
             item {
                 AssistChip(
                     onClick = { onSelected(null) },
-                    label = { Text(if (selected == null) "Nao definida" else "Limpar") }
+                    label = {
+                        Text(
+                            if (selected == null) stringResource(R.string.form_not_defined)
+                            else stringResource(R.string.action_clear)
+                        )
+                    }
                 )
             }
             items(PaymentMethod.entries, key = { it.name }) { method ->

@@ -20,6 +20,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.NotificationsOff
 import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -39,13 +40,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.leona.controlepagamentos.R
 import com.leona.controlepagamentos.data.model.CapturedTransactionEntity
 import com.leona.controlepagamentos.data.model.CategoryEntity
 import com.leona.controlepagamentos.data.model.ParseConfidence
 import com.leona.controlepagamentos.domain.money.MoneyFormatter
 import com.leona.controlepagamentos.ui.components.CategorySelector
-import androidx.compose.material.icons.outlined.NotificationsOff
 import com.leona.controlepagamentos.ui.components.HeaderPill
 import com.leona.controlepagamentos.ui.components.ImmersiveHeader
 import com.leona.controlepagamentos.ui.theme.Alert
@@ -66,9 +68,9 @@ fun CapturesScreen(
 
     Column(modifier = modifier) {
         ImmersiveHeader(
-            title = "Capturados",
+            title = stringResource(R.string.screen_captures),
             trailing = {
-                if (pendingCount > 0) HeaderPill("$pendingCount na fila")
+                if (pendingCount > 0) HeaderPill(stringResource(R.string.captures_in_queue, pendingCount))
             }
         )
         LazyColumn(
@@ -80,8 +82,8 @@ fun CapturesScreen(
                 item {
                     EmptyState(
                         icon = Icons.Outlined.NotificationsOff,
-                        title = "Tudo revisado",
-                        description = "Nenhuma captura aguardando revisão."
+                        title = stringResource(R.string.empty_captures_title),
+                        description = stringResource(R.string.empty_captures_desc)
                     )
                 }
             } else {
@@ -147,7 +149,7 @@ private fun ReviewCard(
                     verticalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
                     Text(
-                        text = capture.merchant ?: "Estabelecimento desconhecido",
+                        text = capture.merchant ?: stringResource(R.string.capture_unknown_merchant),
                         style = MaterialTheme.typography.titleLarge
                     )
                     Text(
@@ -174,7 +176,7 @@ private fun ReviewCard(
                         .background(categoryColor, CircleShape)
                 )
                 Text(
-                    text = category?.name ?: "Sem categoria",
+                    text = category?.name ?: stringResource(R.string.label_no_category),
                     style = MaterialTheme.typography.bodyLarge,
                     modifier = Modifier.weight(1f)
                 )
@@ -189,7 +191,7 @@ private fun ReviewCard(
                 Button(onClick = onConfirm, modifier = Modifier.weight(1f)) {
                     Icon(Icons.Outlined.Check, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(6.dp))
-                    Text("Confirmar")
+                    Text(stringResource(R.string.action_confirm))
                 }
                 OutlinedButton(onClick = onEdit) {
                     Icon(Icons.Outlined.Edit, contentDescription = null, modifier = Modifier.size(18.dp))
@@ -208,10 +210,10 @@ private fun ReviewCard(
 @Composable
 private fun ConfidenceBadge(confidence: ParseConfidence) {
     val (color, label) = when (confidence) {
-        ParseConfidence.HIGH -> Success to "Alta confiança"
-        ParseConfidence.MEDIUM -> Attention to "Média"
-        ParseConfidence.LOW -> Alert to "Baixa"
-        ParseConfidence.FAILED -> Alert to "Falhou"
+        ParseConfidence.HIGH -> Success to stringResource(R.string.confidence_high)
+        ParseConfidence.MEDIUM -> Attention to stringResource(R.string.confidence_medium)
+        ParseConfidence.LOW -> Alert to stringResource(R.string.confidence_low)
+        ParseConfidence.FAILED -> Alert to stringResource(R.string.confidence_failed)
     }
     Box(
         modifier = Modifier
@@ -238,7 +240,7 @@ private fun CaptureReviewDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Revisar captura") },
+        title = { Text(stringResource(R.string.dialog_review_capture)) },
         text = {
             Column(
                 modifier = Modifier.verticalScroll(rememberScrollState()),
@@ -247,14 +249,14 @@ private fun CaptureReviewDialog(
                 OutlinedTextField(
                     value = title,
                     onValueChange = { title = it },
-                    label = { Text("Estabelecimento") },
+                    label = { Text(stringResource(R.string.form_merchant)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
                 OutlinedTextField(
                     value = amount,
                     onValueChange = { amount = it },
-                    label = { Text("Valor") },
+                    label = { Text(stringResource(R.string.form_amount)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -262,7 +264,7 @@ private fun CaptureReviewDialog(
                 OutlinedTextField(
                     value = notes,
                     onValueChange = { notes = it },
-                    label = { Text("Observações") },
+                    label = { Text(stringResource(R.string.form_notes)) },
                     minLines = 2,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -270,12 +272,12 @@ private fun CaptureReviewDialog(
         },
         confirmButton = {
             TextButton(onClick = { onConfirm(title, amount, selectedCategory, notes) }) {
-                Text("Confirmar")
+                Text(stringResource(R.string.action_confirm))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancelar")
+                Text(stringResource(R.string.action_cancel))
             }
         }
     )
