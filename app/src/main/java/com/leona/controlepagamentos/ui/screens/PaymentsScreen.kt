@@ -47,6 +47,7 @@ import com.leona.controlepagamentos.data.model.PaymentEntity
 import com.leona.controlepagamentos.data.model.PaymentMethod
 import com.leona.controlepagamentos.data.model.PaymentStatus
 import com.leona.controlepagamentos.domain.money.MoneyFormatter
+import com.leona.controlepagamentos.ui.components.formatMoney
 import com.leona.controlepagamentos.domain.recurrence.RecurringOccurrence
 import com.leona.controlepagamentos.ui.components.AmountText
 import com.leona.controlepagamentos.ui.components.CategorySelector
@@ -233,7 +234,7 @@ private fun DayHeader(date: LocalDate, totalInCents: Long) {
             fontWeight = FontWeight.SemiBold
         )
         Text(
-            text = MoneyFormatter.format(totalInCents),
+            text = formatMoney(totalInCents),
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )

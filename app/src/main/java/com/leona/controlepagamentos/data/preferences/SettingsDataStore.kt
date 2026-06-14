@@ -18,7 +18,8 @@ data class AppSettings(
     val firstFinancialDay: Int = 1,
     val defaultCategoryId: String = "outros",
     val currencyCode: String = "BRL",
-    val themeMode: ThemeMode = ThemeMode.SYSTEM
+    val themeMode: ThemeMode = ThemeMode.SYSTEM,
+    val privacyMode: Boolean = false
 )
 
 class SettingsDataStore(private val context: Context) {
@@ -29,7 +30,8 @@ class SettingsDataStore(private val context: Context) {
             defaultCategoryId = preferences[Keys.DEFAULT_CATEGORY_ID] ?: "outros",
             currencyCode = preferences[Keys.CURRENCY_CODE] ?: "BRL",
             themeMode = ThemeMode.entries.firstOrNull { it.name == preferences[Keys.THEME_MODE] }
-                ?: ThemeMode.SYSTEM
+                ?: ThemeMode.SYSTEM,
+            privacyMode = preferences[Keys.PRIVACY_MODE] ?: false
         )
     }
 
@@ -49,11 +51,16 @@ class SettingsDataStore(private val context: Context) {
         context.settingsStore.edit { it[Keys.THEME_MODE] = mode.name }
     }
 
+    suspend fun setPrivacyMode(enabled: Boolean) {
+        context.settingsStore.edit { it[Keys.PRIVACY_MODE] = enabled }
+    }
+
     private object Keys {
         val CAPTURE_ENABLED = booleanPreferencesKey("capture_enabled")
         val FIRST_FINANCIAL_DAY = intPreferencesKey("first_financial_day")
         val DEFAULT_CATEGORY_ID = stringPreferencesKey("default_category_id")
         val CURRENCY_CODE = stringPreferencesKey("currency_code")
         val THEME_MODE = stringPreferencesKey("theme_mode")
+        val PRIVACY_MODE = booleanPreferencesKey("privacy_mode")
     }
 }

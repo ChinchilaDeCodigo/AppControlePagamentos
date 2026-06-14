@@ -40,9 +40,9 @@ import com.leona.controlepagamentos.R
 import com.leona.controlepagamentos.data.model.CategoryEntity
 import com.leona.controlepagamentos.domain.budget.BudgetHealth
 import com.leona.controlepagamentos.domain.budget.BudgetProgress
-import com.leona.controlepagamentos.domain.money.MoneyFormatter
 import com.leona.controlepagamentos.ui.components.CategorySelector
 import com.leona.controlepagamentos.ui.components.ImmersiveHeader
+import com.leona.controlepagamentos.ui.components.formatMoney
 import com.leona.controlepagamentos.ui.theme.Alert
 import com.leona.controlepagamentos.ui.theme.Attention
 import com.leona.controlepagamentos.ui.theme.Success
@@ -121,11 +121,11 @@ private fun InsightGrid(uiState: PaymentsUiState) {
     val insight = uiState.spendingInsight
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-            InsightTile(stringResource(R.string.label_paid), MoneyFormatter.format(insight.paidInCents), Modifier.weight(1f))
-            InsightTile(stringResource(R.string.insight_daily_average), MoneyFormatter.format(insight.averageDailyInCents), Modifier.weight(1f))
+            InsightTile(stringResource(R.string.label_paid), formatMoney(insight.paidInCents), Modifier.weight(1f))
+            InsightTile(stringResource(R.string.insight_daily_average), formatMoney(insight.averageDailyInCents), Modifier.weight(1f))
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-            InsightTile(stringResource(R.string.insight_projection), MoneyFormatter.format(insight.projectedMonthInCents), Modifier.weight(1f))
+            InsightTile(stringResource(R.string.insight_projection), formatMoney(insight.projectedMonthInCents), Modifier.weight(1f))
             InsightTile(
                 stringResource(R.string.insight_top_category),
                 insight.topCategoryName?.let {
@@ -135,8 +135,8 @@ private fun InsightGrid(uiState: PaymentsUiState) {
             )
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-            InsightTile(stringResource(R.string.label_captured), MoneyFormatter.format(insight.capturedInCents), Modifier.weight(1f))
-            InsightTile(stringResource(R.string.label_manual), MoneyFormatter.format(insight.manualInCents), Modifier.weight(1f))
+            InsightTile(stringResource(R.string.label_captured), formatMoney(insight.capturedInCents), Modifier.weight(1f))
+            InsightTile(stringResource(R.string.label_manual), formatMoney(insight.manualInCents), Modifier.weight(1f))
         }
     }
 }
@@ -196,13 +196,13 @@ private fun BudgetProgressRow(
             Text(
                 stringResource(
                     R.string.label_spent_of_limit,
-                    MoneyFormatter.format(budget.spentInCents),
-                    MoneyFormatter.format(budget.limitInCents)
+                    formatMoney(budget.spentInCents),
+                    formatMoney(budget.limitInCents)
                 ),
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Text(
-                stringResource(R.string.label_remaining_amount, MoneyFormatter.format(budget.remainingInCents)),
+                stringResource(R.string.label_remaining_amount, formatMoney(budget.remainingInCents)),
                 color = budget.health.color()
             )
         }
@@ -222,7 +222,7 @@ private fun CategoryTotalRow(total: CategoryTotal, maxAmount: Long) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(total.categoryName, fontWeight = FontWeight.SemiBold)
-                Text(MoneyFormatter.format(total.amountInCents), style = MaterialTheme.typography.titleSmall)
+                Text(formatMoney(total.amountInCents), style = MaterialTheme.typography.titleSmall)
             }
             LinearProgressIndicator(
                 progress = { total.amountInCents.toFloat() / maxAmount.toFloat() },

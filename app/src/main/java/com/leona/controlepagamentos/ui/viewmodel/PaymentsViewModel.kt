@@ -343,6 +343,10 @@ class PaymentsViewModel(
         viewModelScope.launch { settingsDataStore.setThemeMode(mode) }
     }
 
+    fun setPrivacyMode(enabled: Boolean) {
+        viewModelScope.launch { settingsDataStore.setPrivacyMode(enabled) }
+    }
+
     fun exportBackup(onExported: (String) -> Unit) {
         viewModelScope.launch {
             runCatching { repository.exportBackupJson() }

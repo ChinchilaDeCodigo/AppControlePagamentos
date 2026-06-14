@@ -53,6 +53,7 @@ fun SettingsScreen(
     onAddSource: (String, String) -> Unit,
     onExportJson: () -> Unit,
     onThemeChanged: (ThemeMode) -> Unit,
+    onPrivacyModeChanged: (Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -68,6 +69,7 @@ fun SettingsScreen(
         ) {
         item { SectionTitle(stringResource(R.string.section_appearance)) }
         item { ThemeSelector(current = uiState.settings.themeMode, onChanged = onThemeChanged) }
+        item { PrivacyModeRow(enabled = uiState.settings.privacyMode, onChanged = onPrivacyModeChanged) }
 
         item { SectionTitle(stringResource(R.string.section_capture)) }
         item {
@@ -167,6 +169,23 @@ fun SettingsScreen(
                 showSourceDialog = false
             }
         )
+    }
+}
+
+@Composable
+private fun PrivacyModeRow(enabled: Boolean, onChanged: (Boolean) -> Unit) {
+    Card(shape = RoundedCornerShape(8.dp), modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier.padding(14.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(stringResource(R.string.setting_privacy_mode_title), fontWeight = FontWeight.SemiBold)
+                Text(stringResource(R.string.setting_privacy_mode_desc), color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            Switch(checked = enabled, onCheckedChange = onChanged)
+        }
     }
 }
 

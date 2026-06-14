@@ -12,6 +12,7 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -21,13 +22,28 @@ import com.leona.controlepagamentos.data.model.CategoryEntity
 import com.leona.controlepagamentos.data.model.PaymentMethod
 import com.leona.controlepagamentos.domain.money.MoneyFormatter
 
+val LocalPrivacyMode = compositionLocalOf { false }
+
+private const val MASKED_AMOUNT = "R\$ •••"
+
+@Composable
+fun formatMoney(amountInCents: Long): String =
+    if (LocalPrivacyMode.current) MASKED_AMOUNT else MoneyFormatter.format(amountInCents)
+
+@Composable
+fun formatMoney(amountInCents: Long?): String = when {
+    LocalPrivacyMode.current -> MASKED_AMOUNT
+    amountInCents != null -> MoneyFormatter.format(amountInCents)
+    else -> "--"
+}
+
 @Composable
 fun AmountText(
     amountInCents: Long,
     modifier: Modifier = Modifier
 ) {
     Text(
-        text = MoneyFormatter.format(amountInCents),
+        text = formatMoney(amountInCents),
         modifier = modifier,
         style = MaterialTheme.typography.titleMedium,
         fontWeight = FontWeight.SemiBold

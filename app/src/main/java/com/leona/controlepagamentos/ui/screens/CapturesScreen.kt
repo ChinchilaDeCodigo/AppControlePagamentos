@@ -47,6 +47,7 @@ import com.leona.controlepagamentos.data.model.CapturedTransactionEntity
 import com.leona.controlepagamentos.data.model.CategoryEntity
 import com.leona.controlepagamentos.data.model.ParseConfidence
 import com.leona.controlepagamentos.domain.money.MoneyFormatter
+import com.leona.controlepagamentos.ui.components.formatMoney
 import com.leona.controlepagamentos.ui.components.CategorySelector
 import com.leona.controlepagamentos.ui.components.HeaderPill
 import com.leona.controlepagamentos.ui.components.ImmersiveHeader
@@ -159,7 +160,7 @@ private fun ReviewCard(
                     )
                 }
                 Text(
-                    text = capture.amountInCents?.let(MoneyFormatter::format) ?: "--",
+                    text = formatMoney(capture.amountInCents),
                     style = MaterialTheme.typography.headlineMedium,
                     color = MaterialTheme.colorScheme.primary
                 )

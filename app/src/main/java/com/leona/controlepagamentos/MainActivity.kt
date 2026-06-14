@@ -37,7 +37,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.res.stringResource
+import com.leona.controlepagamentos.ui.components.LocalPrivacyMode
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -72,7 +74,9 @@ class MainActivity : ComponentActivity() {
                 ThemeMode.SYSTEM -> isSystemInDarkTheme()
             }
             ControlePagamentosTheme(darkTheme = darkTheme) {
-                PaymentsApp(viewModel = viewModel, uiState = uiState)
+                CompositionLocalProvider(LocalPrivacyMode provides uiState.settings.privacyMode) {
+                    PaymentsApp(viewModel = viewModel, uiState = uiState)
+                }
             }
         }
     }
@@ -182,6 +186,7 @@ private fun PaymentsApp(viewModel: PaymentsViewModel, uiState: PaymentsUiState) 
                     }
                 },
                 onThemeChanged = viewModel::setThemeMode,
+                onPrivacyModeChanged = viewModel::setPrivacyMode,
                 modifier = contentModifier
             )
         }

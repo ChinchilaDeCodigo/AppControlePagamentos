@@ -48,6 +48,7 @@ import com.leona.controlepagamentos.domain.money.MoneyFormatter
 import com.leona.controlepagamentos.domain.recurrence.RecurringOccurrence
 import com.leona.controlepagamentos.ui.components.AmountText
 import com.leona.controlepagamentos.ui.components.ImmersiveHeader
+import com.leona.controlepagamentos.ui.components.formatMoney
 import com.leona.controlepagamentos.ui.components.shortDate
 import com.leona.controlepagamentos.ui.theme.Alert
 import com.leona.controlepagamentos.ui.theme.Attention
@@ -77,7 +78,7 @@ fun DashboardScreen(
             )
             Spacer(Modifier.height(8.dp))
             Text(
-                text = MoneyFormatter.format(uiState.summary.paidInCents),
+                text = formatMoney(uiState.summary.paidInCents),
                 style = MaterialTheme.typography.displayLarge,
                 color = Color.White
             )
@@ -183,7 +184,7 @@ private fun StatTile(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
-                    text = MoneyFormatter.format(amountInCents),
+                    text = formatMoney(amountInCents),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -220,7 +221,7 @@ private fun CategoryBar(
             ) {
                 Text(total.categoryName, style = MaterialTheme.typography.bodyLarge)
                 Text(
-                    MoneyFormatter.format(total.amountInCents),
+                    formatMoney(total.amountInCents),
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -270,8 +271,8 @@ private fun BudgetOverviewCard(budget: BudgetProgress) {
             Text(
                 stringResource(
                     R.string.label_spent_of_limit,
-                    MoneyFormatter.format(budget.spentInCents),
-                    MoneyFormatter.format(budget.limitInCents)
+                    formatMoney(budget.spentInCents),
+                    formatMoney(budget.limitInCents)
                 ),
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

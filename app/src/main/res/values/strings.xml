@@ -147,4 +147,8 @@
     <string name="form_category">Categoria</string>
     <string name="form_payment_method">Forma de pagamento</string>
     <string name="form_not_defined">Não definida</string>
+
+    <!-- Privacy mode -->
+    <string name="setting_privacy_mode_title">Modo privacidade</string>
+    <string name="setting_privacy_mode_desc">Oculta os valores monetários</string>
 </resources>
