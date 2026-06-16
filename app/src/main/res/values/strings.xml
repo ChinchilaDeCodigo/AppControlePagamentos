@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- App -->
-    <string name="app_name">Controle de Pagamentos</string>
+    <string name="app_name">pingo</string>
     <string name="notification_listener_label">Captura de pagamentos</string>
 
     <!-- Navigation bar -->
     <string name="nav_dashboard">Dashboard</string>
     <string name="nav_payments">Pagamentos</string>
-    <string name="nav_captures">Capturados</string>
+    <string name="nav_captures">Pingos</string>
     <string name="nav_reports">Relatórios</string>
     <string name="nav_settings">Ajustes</string>
 
     <!-- Screen headers -->
     <string name="screen_dashboard">Início</string>
     <string name="screen_payments">Pagamentos</string>
-    <string name="screen_captures">Capturados</string>
+    <string name="screen_captures">Pingos</string>
     <string name="screen_reports">Relatórios</string>
     <string name="screen_settings">Ajustes</string>
 
@@ -31,7 +31,7 @@
     <string name="label_monthly_budget">Teto mensal</string>
     <string name="label_no_category">Sem categoria</string>
     <string name="label_no_data">Sem dados</string>
-    <string name="label_captured">Capturado</string>
+    <string name="label_captured">Pingado</string>
     <string name="label_manual">Manual</string>
     <string name="label_recurring">Recorrente</string>
     <string name="label_remaining_amount">Restante: %s</string>
@@ -50,9 +50,9 @@
     <string name="section_monitored_apps">Apps monitorados</string>
     <string name="section_backup">Backup</string>
 
-    <!-- Captures -->
-    <string name="captures_pending_title">Capturas pendentes</string>
-    <string name="captures_pending_count">%d aguardando revisão</string>
+    <!-- Captures / Pingos -->
+    <string name="captures_pending_title">Novos pingos</string>
+    <string name="captures_pending_count">%d pra revisar</string>
     <string name="captures_in_queue">%d na fila</string>
     <string name="capture_unknown_merchant">Estabelecimento desconhecido</string>
 
@@ -104,8 +104,8 @@
     <string name="empty_upcoming_desc">Nenhum vencimento próximo.</string>
     <string name="empty_recurring_title">Sem recorrências</string>
     <string name="empty_recurring_desc">Nenhuma recorrência prevista para este mês.</string>
-    <string name="empty_captures_title">Tudo revisado</string>
-    <string name="empty_captures_desc">Nenhuma captura aguardando revisão.</string>
+    <string name="empty_captures_title">Tudo em dia</string>
+    <string name="empty_captures_desc">Nenhum pingo esquecido.</string>
     <string name="empty_payments">Nenhum pagamento neste mês.</string>
     <string name="empty_budgets">Nenhum teto configurado para este mês.</string>
     <string name="empty_category_totals">Sem pagamentos pagos neste mês.</string>
@@ -124,7 +124,7 @@
     <string name="action_remove_budget">Remover teto</string>
 
     <!-- Dialog titles -->
-    <string name="dialog_review_capture">Revisar captura</string>
+    <string name="dialog_review_capture">Revisar pingo</string>
     <string name="dialog_new_payment">Novo pagamento</string>
     <string name="dialog_new_budget">Novo teto</string>
     <string name="dialog_add_app">Adicionar app</string>

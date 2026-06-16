@@ -40,6 +40,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.leona.controlepagamentos.R
 import com.leona.controlepagamentos.data.model.PaymentEntity
 import com.leona.controlepagamentos.domain.budget.BudgetHealth
@@ -48,6 +49,7 @@ import com.leona.controlepagamentos.domain.money.MoneyFormatter
 import com.leona.controlepagamentos.domain.recurrence.RecurringOccurrence
 import com.leona.controlepagamentos.ui.components.AmountText
 import com.leona.controlepagamentos.ui.components.ImmersiveHeader
+import com.leona.controlepagamentos.ui.components.PingoWordmark
 import com.leona.controlepagamentos.ui.components.formatMoney
 import com.leona.controlepagamentos.ui.components.shortDate
 import com.leona.controlepagamentos.ui.theme.Alert
@@ -70,7 +72,10 @@ fun DashboardScreen(
     val categoryColorMap = uiState.categories.associate { it.id to it.colorHex }
 
     Column(modifier = modifier) {
-        ImmersiveHeader(title = stringResource(R.string.screen_dashboard)) {
+        ImmersiveHeader(
+            title = stringResource(R.string.screen_dashboard),
+            titleContent = { PingoWordmark(fontSize = 28.sp, textColor = Color.White, pingColor = Color.White) }
+        ) {
             MonthHeader(
                 label = uiState.monthLabel,
                 onPreviousMonth = onPreviousMonth,

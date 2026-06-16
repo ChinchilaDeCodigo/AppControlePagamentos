@@ -32,6 +32,7 @@ fun ImmersiveHeader(
     title: String,
     modifier: Modifier = Modifier,
     trailing: (@Composable () -> Unit)? = null,
+    titleContent: (@Composable () -> Unit)? = null,
     content: (@Composable ColumnScope.() -> Unit)? = null
 ) {
     CompositionLocalProvider(LocalContentColor provides Color.White) {
@@ -51,12 +52,16 @@ fun ImmersiveHeader(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = title,
-                        style = MaterialTheme.typography.headlineMedium,
-                        color = Color.White,
-                        modifier = Modifier.weight(1f)
-                    )
+                    if (titleContent != null) {
+                        Box(modifier = Modifier.weight(1f)) { titleContent() }
+                    } else {
+                        Text(
+                            text = title,
+                            style = MaterialTheme.typography.headlineMedium,
+                            color = Color.White,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
                     if (trailing != null) trailing()
                 }
                 if (content != null) {
