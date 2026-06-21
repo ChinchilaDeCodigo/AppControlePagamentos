@@ -40,8 +40,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.leona.controlepagamentos.R
 import java.time.format.DateTimeFormatter
@@ -343,9 +345,10 @@ private fun AddPaymentDialog(
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
+                val amountDisplay = formatAmountInput(amountDigits)
                 OutlinedTextField(
-                    value = formatAmountInput(amountDigits),
-                    onValueChange = { amountDigits = it.filter { c -> c.isDigit() }.take(10) },
+                    value = TextFieldValue(amountDisplay, selection = TextRange(amountDisplay.length)),
+                    onValueChange = { amountDigits = it.text.filter { c -> c.isDigit() }.take(10) },
                     label = {
                         Text(
                             if (mode == PaymentFormMode.INSTALLMENT) stringResource(R.string.form_total_amount)
