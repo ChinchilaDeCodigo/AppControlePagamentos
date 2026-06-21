@@ -6,6 +6,8 @@ import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -56,6 +58,9 @@ import com.leona.controlepagamentos.ui.viewmodel.PaymentsViewModel
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        @Suppress("DEPRECATION")
+        window.statusBarColor = android.graphics.Color.parseColor("#3D6CF0")
+        WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightStatusBars = false
         val app = application as PaymentsApplication
 
         setContent {

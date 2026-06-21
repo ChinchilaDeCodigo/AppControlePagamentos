@@ -48,6 +48,7 @@ import com.leona.controlepagamentos.data.model.CategoryEntity
 import com.leona.controlepagamentos.data.model.ParseConfidence
 import com.leona.controlepagamentos.domain.money.MoneyFormatter
 import com.leona.controlepagamentos.ui.components.formatMoney
+import com.leona.controlepagamentos.ui.components.shortDateTime
 import com.leona.controlepagamentos.ui.components.CategorySelector
 import com.leona.controlepagamentos.ui.components.HeaderPill
 import com.leona.controlepagamentos.ui.components.ImmersiveHeader
@@ -157,6 +158,11 @@ private fun ReviewCard(
                         text = capture.sourceAppName ?: capture.sourcePackage,
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = capture.capturedAt.shortDateTime(),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.65f)
                     )
                 }
                 Text(

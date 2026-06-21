@@ -5,11 +5,16 @@ import com.leona.controlepagamentos.data.model.ParseConfidence
 import com.leona.controlepagamentos.data.model.PaymentMethod
 import com.leona.controlepagamentos.data.model.PaymentStatus
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 private val dateFormatter = DateTimeFormatter.ofPattern("dd/MM")
+private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
+private val dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM · HH:mm")
 
 fun LocalDate.shortDate(): String = format(dateFormatter)
+fun LocalDateTime.shortTime(): String = format(timeFormatter)
+fun LocalDateTime.shortDateTime(): String = format(dateTimeFormatter)
 
 fun PaymentStatus.label(): String = when (this) {
     PaymentStatus.PENDING -> "Pendente"

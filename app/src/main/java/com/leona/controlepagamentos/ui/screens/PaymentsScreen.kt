@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
@@ -40,6 +41,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.leona.controlepagamentos.R
 import com.leona.controlepagamentos.data.model.CategoryEntity
@@ -48,6 +50,7 @@ import com.leona.controlepagamentos.data.model.PaymentMethod
 import com.leona.controlepagamentos.data.model.PaymentStatus
 import com.leona.controlepagamentos.domain.money.MoneyFormatter
 import com.leona.controlepagamentos.ui.components.formatMoney
+import com.leona.controlepagamentos.ui.components.shortTime
 import com.leona.controlepagamentos.domain.recurrence.RecurringOccurrence
 import com.leona.controlepagamentos.ui.components.AmountText
 import com.leona.controlepagamentos.ui.components.CategorySelector
@@ -180,8 +183,9 @@ private fun PaymentRow(payment: PaymentEntity, onMarkPaid: (String) -> Unit) {
         ) {
             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(payment.title, fontWeight = FontWeight.SemiBold)
+                val timeInfo = if (payment.paidAt != null) " · ${payment.paidAt.shortTime()}" else ""
                 Text(
-                    "${payment.dueDate.shortDate()} - ${displayStatus.label()}",
+                    "${payment.dueDate.shortDate()} - ${displayStatus.label()}$timeInfo",
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
@@ -313,6 +317,7 @@ private fun AddPaymentDialog(
                         )
                     },
                     singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     modifier = Modifier.fillMaxWidth()
                 )
                 when (mode) {
@@ -331,6 +336,7 @@ private fun AddPaymentDialog(
                             onValueChange = { installments = it },
                             label = { Text(stringResource(R.string.form_installments)) },
                             singleLine = true,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             modifier = Modifier.fillMaxWidth()
                         )
                         OutlinedTextField(
@@ -347,6 +353,7 @@ private fun AddPaymentDialog(
                             onValueChange = { dayOfMonth = it },
                             label = { Text(stringResource(R.string.form_day_of_month)) },
                             singleLine = true,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             modifier = Modifier.fillMaxWidth()
                         )
                         OutlinedTextField(
