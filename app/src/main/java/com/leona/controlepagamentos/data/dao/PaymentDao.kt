@@ -42,4 +42,7 @@ interface PaymentDao {
 
     @Query("UPDATE payments SET status = :status, paidAt = :paidAt, updatedAt = :updatedAt WHERE id = :id")
     suspend fun updateStatus(id: String, status: PaymentStatus, paidAt: LocalDateTime?, updatedAt: LocalDateTime)
+
+    @Query("DELETE FROM payments WHERE id = :id")
+    suspend fun delete(id: String)
 }

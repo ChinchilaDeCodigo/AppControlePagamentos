@@ -307,19 +307,29 @@ class PaymentsViewModel(
         viewModelScope.launch { repository.ignoreCapture(captureId) }
     }
 
+    fun updatePayment(payment: PaymentEntity) {
+        viewModelScope.launch { repository.updatePayment(payment) }
+    }
+
+    fun deletePayment(id: String) {
+        viewModelScope.launch { repository.deletePayment(id) }
+    }
+
     fun confirmCapture(
         capture: CapturedTransactionEntity,
         title: String,
         amount: String,
         categoryId: String?,
-        notes: String?
+        notes: String?,
+        paymentMethod: PaymentMethod? = null
     ) = runValidated {
         repository.confirmCapture(
             captureId = capture.id,
             title = title.ifBlank { capture.merchant.orEmpty() },
             amountInCents = amount.ifBlank { capture.amountInCents?.let(MoneyFormatter::format).orEmpty() }.requireMoney(),
             categoryId = categoryId,
-            notes = notes
+            notes = notes,
+            paymentMethod = paymentMethod
         )
     }
 

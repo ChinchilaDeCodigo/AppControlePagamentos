@@ -219,7 +219,8 @@ class PaymentRepository(
         title: String?,
         amountInCents: Long?,
         categoryId: String?,
-        notes: String?
+        notes: String?,
+        paymentMethod: PaymentMethod? = null
     ) {
         val capture = capturedTransactionDao.getById(captureId) ?: return
         val confirmedAmount = amountInCents ?: capture.amountInCents ?: return
@@ -237,7 +238,7 @@ class PaymentRepository(
                 paidAt = capture.occurredAt,
                 status = PaymentStatus.PAID,
                 type = PaymentType.CAPTURED,
-                paymentMethod = null,
+                paymentMethod = paymentMethod,
                 source = PaymentSource.CAPTURED_NOTIFICATION,
                 notes = notes?.trim()?.takeIf { it.isNotBlank() },
                 capturedTransactionId = capture.id,
@@ -249,6 +250,14 @@ class PaymentRepository(
             )
         )
         capturedTransactionDao.updateStatus(captureId, CaptureStatus.CONFIRMED)
+    }
+
+    suspend fun updatePayment(payment: PaymentEntity) {
+        paymentDao.update(payment.copy(updatedAt = LocalDateTime.now()))
+    }
+
+    suspend fun deletePayment(id: String) {
+        paymentDao.delete(id)
     }
 
     suspend fun setSourceEnabled(source: NotificationSourceEntity, enabled: Boolean) {

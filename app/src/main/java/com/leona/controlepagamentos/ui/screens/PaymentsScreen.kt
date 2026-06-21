@@ -1,5 +1,6 @@
 package com.leona.controlepagamentos.ui.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,17 +21,24 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -67,6 +75,7 @@ import com.leona.controlepagamentos.ui.viewmodel.PaymentFilter
 import com.leona.controlepagamentos.ui.viewmodel.PaymentsUiState
 import java.time.LocalDate
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PaymentsScreen(
     uiState: PaymentsUiState,
@@ -78,9 +87,12 @@ fun PaymentsScreen(
     onAddSingle: (String, String, String, String?, PaymentMethod?, String?) -> Unit,
     onAddInstallment: (String, String, String, String, String?, PaymentMethod?, String?) -> Unit,
     onAddRecurring: (String, String, String, String, String?, PaymentMethod?, String?) -> Unit,
+    onUpdatePayment: (PaymentEntity) -> Unit = {},
+    onDeletePayment: (String) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     var showForm by rememberSaveable { mutableStateOf(false) }
+    var selectedPayment by remember { mutableStateOf<PaymentEntity?>(null) }
 
     Box(modifier = modifier) {
         Column(modifier = Modifier.fillMaxSize()) {
@@ -110,7 +122,11 @@ fun PaymentsScreen(
                         DayHeader(date = date, totalInCents = dailyTotal)
                     }
                     items(payments, key = { it.id }) { payment ->
-                        PaymentRow(payment = payment, onMarkPaid = onMarkPaid)
+                        PaymentRow(
+                            payment = payment,
+                            onMarkPaid = onMarkPaid,
+                            onClick = { selectedPayment = payment }
+                        )
                     }
                 }
 
@@ -129,6 +145,17 @@ fun PaymentsScreen(
             icon = { Icon(Icons.Outlined.Add, contentDescription = null) },
             text = { Text(stringResource(R.string.action_new)) },
             modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp)
+        )
+    }
+
+    selectedPayment?.let { payment ->
+        PaymentDetailSheet(
+            payment = payment,
+            categories = uiState.categories,
+            onDismiss = { selectedPayment = null },
+            onSave = { updated -> onUpdatePayment(updated); selectedPayment = null },
+            onMarkPaid = { id -> onMarkPaid(id); selectedPayment = null },
+            onDelete = { id -> onDeletePayment(id); selectedPayment = null }
         )
     }
 
@@ -172,7 +199,7 @@ private fun PaymentFilterRow(selected: PaymentFilter, onSelected: (PaymentFilter
 }
 
 @Composable
-private fun PaymentRow(payment: PaymentEntity, onMarkPaid: (String) -> Unit) {
+private fun PaymentRow(payment: PaymentEntity, onMarkPaid: (String) -> Unit, onClick: () -> Unit = {}) {
     val today = LocalDate.now()
     val displayStatus = if (payment.status == PaymentStatus.PENDING && payment.dueDate.isBefore(today)) {
         PaymentStatus.OVERDUE
@@ -180,7 +207,7 @@ private fun PaymentRow(payment: PaymentEntity, onMarkPaid: (String) -> Unit) {
         payment.status
     }
 
-    Card(shape = RoundedCornerShape(8.dp), modifier = Modifier.fillMaxWidth()) {
+    Card(shape = RoundedCornerShape(8.dp), modifier = Modifier.fillMaxWidth().clickable(onClick = onClick)) {
         Row(
             modifier = Modifier.padding(14.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -247,6 +274,151 @@ private fun DayHeader(date: LocalDate, totalInCents: Long) {
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun PaymentDetailSheet(
+    payment: PaymentEntity,
+    categories: List<CategoryEntity>,
+    onDismiss: () -> Unit,
+    onSave: (PaymentEntity) -> Unit,
+    onMarkPaid: (String) -> Unit,
+    onDelete: (String) -> Unit
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val today = LocalDate.now()
+    val displayStatus = if (payment.status == PaymentStatus.PENDING && payment.dueDate.isBefore(today))
+        PaymentStatus.OVERDUE else payment.status
+
+    val locale = Locale.getDefault()
+    val isDayFirst = remember {
+        val test = LocalDate.of(2000, 12, 31)
+        DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT).withLocale(locale).format(test).startsWith("31")
+    }
+
+    var title by remember { mutableStateOf(payment.title) }
+    var amountDigits by remember { mutableStateOf(payment.amountInCents.toString()) }
+    var dateDigits by remember {
+        mutableStateOf(
+            if (isDayFirst) "%02d%02d%04d".format(payment.dueDate.dayOfMonth, payment.dueDate.monthValue, payment.dueDate.year)
+            else "%02d%02d%04d".format(payment.dueDate.monthValue, payment.dueDate.dayOfMonth, payment.dueDate.year)
+        )
+    }
+    var selectedCategory by remember { mutableStateOf(payment.categoryId) }
+    var method by remember { mutableStateOf(payment.paymentMethod) }
+    var notes by remember { mutableStateOf(payment.notes.orEmpty()) }
+    var showDeleteConfirm by remember { mutableStateOf(false) }
+
+    if (showDeleteConfirm) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirm = false },
+            title = { Text(stringResource(R.string.dialog_delete_payment_title)) },
+            text = { Text(stringResource(R.string.dialog_delete_payment_desc)) },
+            confirmButton = {
+                TextButton(
+                    onClick = { onDelete(payment.id) },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                ) { Text(stringResource(R.string.action_delete)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteConfirm = false }) {
+                    Text(stringResource(R.string.action_cancel))
+                }
+            }
+        )
+    }
+
+    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 20.dp)
+                .padding(bottom = 32.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                val timeInfo = if (payment.paidAt != null) " · ${payment.paidAt.shortTime()}" else ""
+                Text(
+                    "${displayStatus.label()}$timeInfo",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                AmountText(payment.amountInCents)
+            }
+            HorizontalDivider()
+            OutlinedTextField(
+                value = title,
+                onValueChange = { title = it },
+                label = { Text(stringResource(R.string.form_title)) },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+            val amountDisplay = formatAmountInput(amountDigits)
+            OutlinedTextField(
+                value = TextFieldValue(amountDisplay, selection = TextRange(amountDisplay.length)),
+                onValueChange = { amountDigits = it.text.filter { c -> c.isDigit() }.take(10) },
+                label = { Text(stringResource(R.string.form_amount)) },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                modifier = Modifier.fillMaxWidth()
+            )
+            OutlinedTextField(
+                value = formatDateInput(dateDigits),
+                onValueChange = { dateDigits = it.filter { c -> c.isDigit() }.take(8) },
+                label = { Text(stringResource(R.string.form_due_date)) },
+                placeholder = { Text(if (isDayFirst) "DD/MM/AAAA" else "MM/DD/AAAA") },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                modifier = Modifier.fillMaxWidth()
+            )
+            CategorySelector(categories, selectedCategory, { selectedCategory = it })
+            PaymentMethodSelector(selected = method, onSelected = { method = it })
+            OutlinedTextField(
+                value = notes,
+                onValueChange = { notes = it },
+                label = { Text(stringResource(R.string.form_notes)) },
+                modifier = Modifier.fillMaxWidth(),
+                minLines = 2
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+                if (payment.status == PaymentStatus.PENDING) {
+                    OutlinedButton(
+                        onClick = { onMarkPaid(payment.id) },
+                        modifier = Modifier.weight(1f)
+                    ) { Text(stringResource(R.string.action_mark_paid)) }
+                }
+                Button(
+                    onClick = {
+                        val newDate = runCatching {
+                            LocalDate.parse(dateInputToIso(dateDigits, isDayFirst))
+                        }.getOrElse { payment.dueDate }
+                        val newAmount = MoneyFormatter.parseToCents(formatAmountInput(amountDigits))
+                            ?: payment.amountInCents
+                        onSave(payment.copy(
+                            title = title.trim().ifBlank { payment.title },
+                            amountInCents = newAmount,
+                            dueDate = newDate,
+                            categoryId = selectedCategory,
+                            paymentMethod = method,
+                            notes = notes.trim().ifBlank { null }
+                        ))
+                    },
+                    modifier = Modifier.weight(1f)
+                ) { Text(stringResource(R.string.action_save)) }
+            }
+            TextButton(
+                onClick = { showDeleteConfirm = true },
+                colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            ) { Text(stringResource(R.string.action_delete)) }
+        }
     }
 }
 

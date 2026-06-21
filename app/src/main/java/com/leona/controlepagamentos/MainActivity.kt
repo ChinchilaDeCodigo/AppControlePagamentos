@@ -166,11 +166,15 @@ private fun PaymentsApp(viewModel: PaymentsViewModel, uiState: PaymentsUiState) 
                 onAddSingle = viewModel::addSinglePayment,
                 onAddInstallment = viewModel::addInstallmentPayment,
                 onAddRecurring = viewModel::addRecurringPayment,
+                onUpdatePayment = viewModel::updatePayment,
+                onDeletePayment = viewModel::deletePayment,
                 modifier = contentModifier
             )
             MainTab.CAPTURES -> CapturesScreen(
                 uiState = uiState,
-                onConfirm = viewModel::confirmCapture,
+                onConfirm = { capture, title, amount, categoryId, notes, method ->
+                    viewModel.confirmCapture(capture, title, amount, categoryId, notes, method)
+                },
                 onIgnore = viewModel::ignoreCapture,
                 modifier = contentModifier
             )

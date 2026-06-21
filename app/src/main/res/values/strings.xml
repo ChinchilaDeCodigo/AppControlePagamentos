@@ -122,6 +122,9 @@
     <string name="action_mark_paid">Marcar pago</string>
     <string name="action_clear">Limpar</string>
     <string name="action_remove_budget">Remover teto</string>
+    <string name="action_delete">Excluir</string>
+    <string name="dialog_delete_payment_title">Excluir pagamento?</string>
+    <string name="dialog_delete_payment_desc">Ele será removido permanentemente.</string>
 
     <!-- Dialog titles -->
     <string name="dialog_review_capture">Revisar pingo</string>
@@ -135,11 +138,11 @@
     <string name="form_total_amount">Valor total</string>
     <string name="form_notes">Observações</string>
     <string name="form_title">Título</string>
-    <string name="form_due_date">Vencimento AAAA-MM-DD</string>
+    <string name="form_due_date">Vencimento</string>
     <string name="form_installments">Parcelas</string>
-    <string name="form_first_installment">Primeira parcela AAAA-MM-DD</string>
+    <string name="form_first_installment">Primeira parcela</string>
     <string name="form_day_of_month">Dia do mês</string>
-    <string name="form_start_date">Início AAAA-MM-DD</string>
+    <string name="form_start_date">Início</string>
     <string name="form_name">Nome</string>
     <string name="form_limit_amount">Valor limite</string>
     <string name="form_alert_percent">Alertar em %</string>

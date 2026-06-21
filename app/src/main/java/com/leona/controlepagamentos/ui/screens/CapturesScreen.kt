@@ -54,10 +54,12 @@ import com.leona.controlepagamentos.R
 import com.leona.controlepagamentos.data.model.CapturedTransactionEntity
 import com.leona.controlepagamentos.data.model.CategoryEntity
 import com.leona.controlepagamentos.data.model.ParseConfidence
+import com.leona.controlepagamentos.data.model.PaymentMethod
 import com.leona.controlepagamentos.domain.money.MoneyFormatter
 import com.leona.controlepagamentos.ui.components.formatMoney
 import com.leona.controlepagamentos.ui.components.shortDateTime
 import com.leona.controlepagamentos.ui.components.CategorySelector
+import com.leona.controlepagamentos.ui.components.PaymentMethodSelector
 import com.leona.controlepagamentos.ui.components.HeaderPill
 import com.leona.controlepagamentos.ui.components.ImmersiveHeader
 import com.leona.controlepagamentos.ui.theme.Alert
@@ -68,7 +70,7 @@ import com.leona.controlepagamentos.ui.viewmodel.PaymentsUiState
 @Composable
 fun CapturesScreen(
     uiState: PaymentsUiState,
-    onConfirm: (CapturedTransactionEntity, String, String, String?, String?) -> Unit,
+    onConfirm: (CapturedTransactionEntity, String, String, String?, String?, PaymentMethod?) -> Unit,
     onIgnore: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -108,6 +110,7 @@ fun CapturesScreen(
                                 title,
                                 capture.amountInCents?.let(MoneyFormatter::format).orEmpty(),
                                 capture.suggestedCategoryId,
+                                null,
                                 null
                             )
                         },
@@ -123,8 +126,8 @@ fun CapturesScreen(
             capture = captureToEdit,
             categories = uiState.categories,
             onDismiss = { editingCapture = null },
-            onConfirm = { title, amount, categoryId, notes ->
-                onConfirm(captureToEdit, title, amount, categoryId, notes)
+            onConfirm = { title, amount, categoryId, notes, method ->
+                onConfirm(captureToEdit, title, amount, categoryId, notes, method)
                 editingCapture = null
             }
         )
@@ -278,7 +281,7 @@ private fun CaptureReviewDialog(
     capture: CapturedTransactionEntity,
     categories: List<CategoryEntity>,
     onDismiss: () -> Unit,
-    onConfirm: (String, String, String?, String?) -> Unit
+    onConfirm: (String, String, String?, String?, PaymentMethod?) -> Unit
 ) {
     var title by rememberSaveable(capture.id) { mutableStateOf(capture.merchant.orEmpty()) }
     var amount by rememberSaveable(capture.id) {
@@ -286,6 +289,7 @@ private fun CaptureReviewDialog(
     }
     var selectedCategory by rememberSaveable(capture.id) { mutableStateOf(capture.suggestedCategoryId) }
     var notes by rememberSaveable(capture.id) { mutableStateOf("") }
+    var method by remember { mutableStateOf<PaymentMethod?>(null) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -310,6 +314,7 @@ private fun CaptureReviewDialog(
                     modifier = Modifier.fillMaxWidth()
                 )
                 CategorySelector(categories, selectedCategory, { selectedCategory = it })
+                PaymentMethodSelector(method, { method = it })
                 OutlinedTextField(
                     value = notes,
                     onValueChange = { notes = it },
@@ -320,7 +325,7 @@ private fun CaptureReviewDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = { onConfirm(title, amount, selectedCategory, notes) }) {
+            TextButton(onClick = { onConfirm(title, amount, selectedCategory, notes, method) }) {
                 Text(stringResource(R.string.action_confirm))
             }
         },
