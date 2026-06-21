@@ -44,6 +44,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.leona.controlepagamentos.R
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
+import java.util.Locale
 import com.leona.controlepagamentos.data.model.CategoryEntity
 import com.leona.controlepagamentos.data.model.PaymentEntity
 import com.leona.controlepagamentos.data.model.PaymentMethod
@@ -245,6 +248,28 @@ private fun DayHeader(date: LocalDate, totalInCents: Long) {
     }
 }
 
+private fun formatAmountInput(digits: String): String {
+    if (digits.isEmpty()) return ""
+    val padded = digits.padStart(3, '0')
+    val intPart = padded.dropLast(2).trimStart('0').ifEmpty { "0" }
+    return "$intPart,${padded.takeLast(2)}"
+}
+
+private fun formatDateInput(digits: String): String = buildString {
+    digits.take(8).forEachIndexed { i, c ->
+        if (i == 2 || i == 4) append('/')
+        append(c)
+    }
+}
+
+private fun dateInputToIso(digits: String, isDayFirst: Boolean): String {
+    if (digits.length < 8) return digits
+    return try {
+        val pattern = if (isDayFirst) "dd/MM/yyyy" else "MM/dd/yyyy"
+        LocalDate.parse(formatDateInput(digits), DateTimeFormatter.ofPattern(pattern)).toString()
+    } catch (e: Exception) { digits }
+}
+
 private enum class PaymentFormMode {
     SINGLE,
     INSTALLMENT,
@@ -259,10 +284,21 @@ private fun AddPaymentDialog(
     onAddInstallment: (String, String, String, String, String?, PaymentMethod?, String?) -> Unit,
     onAddRecurring: (String, String, String, String, String?, PaymentMethod?, String?) -> Unit
 ) {
+    val locale = Locale.getDefault()
+    val isDayFirst = remember {
+        val test = LocalDate.of(2000, 12, 31)
+        DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT).withLocale(locale).format(test).startsWith("31")
+    }
     var mode by remember { mutableStateOf(PaymentFormMode.SINGLE) }
     var title by rememberSaveable { mutableStateOf("") }
-    var amount by rememberSaveable { mutableStateOf("") }
-    var date by rememberSaveable { mutableStateOf(LocalDate.now().toString()) }
+    var amountDigits by rememberSaveable { mutableStateOf("") }
+    var dateDigits by rememberSaveable {
+        val t = LocalDate.now()
+        mutableStateOf(
+            if (isDayFirst) "%02d%02d%04d".format(t.dayOfMonth, t.monthValue, t.year)
+            else "%02d%02d%04d".format(t.monthValue, t.dayOfMonth, t.year)
+        )
+    }
     var installments by rememberSaveable { mutableStateOf("3") }
     var dayOfMonth by rememberSaveable { mutableStateOf(LocalDate.now().dayOfMonth.toString()) }
     var selectedCategory by rememberSaveable { mutableStateOf<String?>(null) }
@@ -308,25 +344,28 @@ private fun AddPaymentDialog(
                     modifier = Modifier.fillMaxWidth()
                 )
                 OutlinedTextField(
-                    value = amount,
-                    onValueChange = { amount = it },
+                    value = formatAmountInput(amountDigits),
+                    onValueChange = { amountDigits = it.filter { c -> c.isDigit() }.take(10) },
                     label = {
                         Text(
                             if (mode == PaymentFormMode.INSTALLMENT) stringResource(R.string.form_total_amount)
                             else stringResource(R.string.form_amount)
                         )
                     },
+                    placeholder = { Text("0,00") },
                     singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.fillMaxWidth()
                 )
                 when (mode) {
                     PaymentFormMode.SINGLE -> {
                         OutlinedTextField(
-                            value = date,
-                            onValueChange = { date = it },
+                            value = formatDateInput(dateDigits),
+                            onValueChange = { dateDigits = it.filter { c -> c.isDigit() }.take(8) },
                             label = { Text(stringResource(R.string.form_due_date)) },
+                            placeholder = { Text(if (isDayFirst) "DD/MM/AAAA" else "MM/DD/AAAA") },
                             singleLine = true,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             modifier = Modifier.fillMaxWidth()
                         )
                     }
@@ -340,10 +379,12 @@ private fun AddPaymentDialog(
                             modifier = Modifier.fillMaxWidth()
                         )
                         OutlinedTextField(
-                            value = date,
-                            onValueChange = { date = it },
+                            value = formatDateInput(dateDigits),
+                            onValueChange = { dateDigits = it.filter { c -> c.isDigit() }.take(8) },
                             label = { Text(stringResource(R.string.form_first_installment)) },
+                            placeholder = { Text(if (isDayFirst) "DD/MM/AAAA" else "MM/DD/AAAA") },
                             singleLine = true,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             modifier = Modifier.fillMaxWidth()
                         )
                     }
@@ -357,10 +398,12 @@ private fun AddPaymentDialog(
                             modifier = Modifier.fillMaxWidth()
                         )
                         OutlinedTextField(
-                            value = date,
-                            onValueChange = { date = it },
+                            value = formatDateInput(dateDigits),
+                            onValueChange = { dateDigits = it.filter { c -> c.isDigit() }.take(8) },
                             label = { Text(stringResource(R.string.form_start_date)) },
+                            placeholder = { Text(if (isDayFirst) "DD/MM/AAAA" else "MM/DD/AAAA") },
                             singleLine = true,
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             modifier = Modifier.fillMaxWidth()
                         )
                     }
@@ -380,10 +423,12 @@ private fun AddPaymentDialog(
         confirmButton = {
             TextButton(
                 onClick = {
+                    val isoDate = dateInputToIso(dateDigits, isDayFirst)
+                    val formattedAmount = formatAmountInput(amountDigits)
                     when (mode) {
-                        PaymentFormMode.SINGLE -> onAddSingle(title, amount, date, selectedCategory, method, notes)
-                        PaymentFormMode.INSTALLMENT -> onAddInstallment(title, amount, installments, date, selectedCategory, method, notes)
-                        PaymentFormMode.RECURRING -> onAddRecurring(title, amount, dayOfMonth, date, selectedCategory, method, notes)
+                        PaymentFormMode.SINGLE -> onAddSingle(title, formattedAmount, isoDate, selectedCategory, method, notes)
+                        PaymentFormMode.INSTALLMENT -> onAddInstallment(title, formattedAmount, installments, isoDate, selectedCategory, method, notes)
+                        PaymentFormMode.RECURRING -> onAddRecurring(title, formattedAmount, dayOfMonth, isoDate, selectedCategory, method, notes)
                     }
                 }
             ) {
