@@ -66,6 +66,7 @@ fun DashboardScreen(
     onNextMonth: () -> Unit,
     onMarkPaid: (String) -> Unit,
     onMarkRecurringPaid: (RecurringOccurrence) -> Unit,
+    onNavigateToCaptures: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val categoryMaxAmount = uiState.categoryTotals.maxOfOrNull { it.amountInCents }?.takeIf { it > 0 } ?: 1L
@@ -116,7 +117,7 @@ fun DashboardScreen(
                 }
             }
             item {
-                CaptureSummary(uiState.summary.pendingCaptureCount)
+                CaptureSummary(uiState.summary.pendingCaptureCount, onNavigateToCaptures)
             }
             if (uiState.categoryTotals.isNotEmpty()) {
                 item { SectionTitle(stringResource(R.string.section_spending_by_category)) }
@@ -319,8 +320,9 @@ fun MonthHeader(
 }
 
 @Composable
-private fun CaptureSummary(count: Int) {
+private fun CaptureSummary(count: Int, onClick: () -> Unit) {
     Card(
+        onClick = onClick,
         shape = RoundedCornerShape(8.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
         modifier = Modifier.fillMaxWidth()

@@ -153,6 +153,7 @@ private fun PaymentsApp(viewModel: PaymentsViewModel, uiState: PaymentsUiState) 
                 onNextMonth = viewModel::nextMonth,
                 onMarkPaid = viewModel::markPaid,
                 onMarkRecurringPaid = viewModel::markRecurringPaid,
+                onNavigateToCaptures = { selectedTab = MainTab.CAPTURES },
                 modifier = contentModifier
             )
             MainTab.PAYMENTS -> PaymentsScreen(
