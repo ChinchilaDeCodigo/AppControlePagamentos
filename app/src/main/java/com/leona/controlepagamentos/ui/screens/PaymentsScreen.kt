@@ -185,7 +185,7 @@ private fun PaymentRow(payment: PaymentEntity, onMarkPaid: (String) -> Unit) {
                 Text(payment.title, fontWeight = FontWeight.SemiBold)
                 val timeInfo = if (payment.paidAt != null) " · ${payment.paidAt.shortTime()}" else ""
                 Text(
-                    "${payment.dueDate.shortDate()} - ${displayStatus.label()}$timeInfo",
+                    "${payment.dueDate.shortDate()}$timeInfo - ${displayStatus.label()}",
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
