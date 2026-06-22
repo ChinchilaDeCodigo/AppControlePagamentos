@@ -10,6 +10,7 @@ import com.leona.controlepagamentos.data.model.NotificationSourceEntity
 import com.leona.controlepagamentos.data.model.PaymentEntity
 import com.leona.controlepagamentos.data.model.PaymentMethod
 import com.leona.controlepagamentos.data.model.PaymentStatus
+import com.leona.controlepagamentos.data.model.RecurringPaymentRuleEntity
 import com.leona.controlepagamentos.data.preferences.AppSettings
 import com.leona.controlepagamentos.data.preferences.SettingsDataStore
 import com.leona.controlepagamentos.data.preferences.ThemeMode
@@ -78,6 +79,7 @@ data class PaymentsUiState(
         topCategorySharePercent = 0
     ),
     val upcomingPayments: List<PaymentEntity> = emptyList(),
+    val recurringRules: List<RecurringPaymentRuleEntity> = emptyList(),
     val errorMessage: String? = null
 )
 
@@ -86,6 +88,7 @@ private data class BaseState(
     val payments: List<PaymentEntity>,
     val budgets: List<BudgetEntity>,
     val recurringOccurrences: List<RecurringOccurrence>,
+    val recurringRules: List<RecurringPaymentRuleEntity>,
     val categories: List<CategoryEntity>,
     val pendingCaptures: List<CapturedTransactionEntity>,
     val sources: List<NotificationSourceEntity>
@@ -141,6 +144,7 @@ class PaymentsViewModel(
                     payments = observed.payments,
                     budgets = observed.budgets,
                     recurringOccurrences = occurrences,
+                    recurringRules = rules,
                     categories = observed.categories,
                     pendingCaptures = observed.pendingCaptures,
                     sources = observed.sources
@@ -192,6 +196,7 @@ class PaymentsViewModel(
                 budgetProgress = budgetProgress,
                 spendingInsight = spendingInsight,
                 upcomingPayments = upcoming,
+                recurringRules = base.recurringRules,
                 errorMessage = error
             )
         }
@@ -313,6 +318,14 @@ class PaymentsViewModel(
 
     fun deletePayment(id: String) {
         viewModelScope.launch { repository.deletePayment(id) }
+    }
+
+    fun updateRecurringRule(rule: RecurringPaymentRuleEntity) {
+        viewModelScope.launch { repository.updateRecurringRule(rule) }
+    }
+
+    fun deleteRecurringRule(id: String) {
+        viewModelScope.launch { repository.deleteRecurringRule(id) }
     }
 
     fun confirmCapture(

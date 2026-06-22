@@ -18,7 +18,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Edit
@@ -36,15 +35,11 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -104,10 +99,10 @@ fun CapturesScreen(
                         capture = capture,
                         categories = uiState.categories,
                         onEdit = { editingCapture = capture.id },
-                        onConfirm = { title ->
+                        onConfirm = {
                             onConfirm(
                                 capture,
-                                title,
+                                capture.merchant.orEmpty(),
                                 capture.amountInCents?.let(MoneyFormatter::format).orEmpty(),
                                 capture.suggestedCategoryId,
                                 null,
@@ -139,21 +134,13 @@ private fun ReviewCard(
     capture: CapturedTransactionEntity,
     categories: List<CategoryEntity>,
     onEdit: () -> Unit,
-    onConfirm: (String) -> Unit,
+    onConfirm: () -> Unit,
     onIgnore: () -> Unit
 ) {
     val category = categories.firstOrNull { it.id == capture.suggestedCategoryId }
     val categoryColor = category?.colorHex?.let {
         runCatching { Color(android.graphics.Color.parseColor(it)) }.getOrNull()
     } ?: MaterialTheme.colorScheme.onSurfaceVariant
-
-    var editedTitle by remember(capture.id) { mutableStateOf(capture.merchant.orEmpty()) }
-    var isEditingTitle by remember { mutableStateOf(false) }
-    val focusRequester = remember { FocusRequester() }
-
-    LaunchedEffect(isEditingTitle) {
-        if (isEditingTitle) focusRequester.requestFocus()
-    }
 
     Card(shape = MaterialTheme.shapes.medium, modifier = Modifier.fillMaxWidth()) {
         Column(
@@ -169,36 +156,10 @@ private fun ReviewCard(
                     modifier = Modifier.weight(1f).padding(end = 12.dp),
                     verticalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
-                    if (isEditingTitle) {
-                        OutlinedTextField(
-                            value = editedTitle,
-                            onValueChange = { editedTitle = it },
-                            singleLine = true,
-                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                            keyboardActions = KeyboardActions(onDone = { isEditingTitle = false }),
-                            textStyle = MaterialTheme.typography.titleLarge,
-                            modifier = Modifier.fillMaxWidth().focusRequester(focusRequester)
-                        )
-                    } else {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                text = editedTitle.ifEmpty { stringResource(R.string.capture_unknown_merchant) },
-                                style = MaterialTheme.typography.titleLarge,
-                                modifier = Modifier.weight(1f)
-                            )
-                            IconButton(
-                                onClick = { isEditingTitle = true },
-                                modifier = Modifier.size(28.dp)
-                            ) {
-                                Icon(
-                                    Icons.Outlined.Edit,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(16.dp),
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                        }
-                    }
+                    Text(
+                        text = capture.merchant.orEmpty().ifEmpty { stringResource(R.string.capture_unknown_merchant) },
+                        style = MaterialTheme.typography.titleLarge
+                    )
                     Text(
                         text = capture.sourceAppName ?: capture.sourcePackage,
                         style = MaterialTheme.typography.labelMedium,
@@ -240,7 +201,7 @@ private fun ReviewCard(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Button(onClick = { onConfirm(editedTitle) }, modifier = Modifier.weight(1f)) {
+                Button(onClick = onConfirm, modifier = Modifier.weight(1f)) {
                     Icon(Icons.Outlined.Check, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(6.dp))
                     Text(stringResource(R.string.action_confirm))

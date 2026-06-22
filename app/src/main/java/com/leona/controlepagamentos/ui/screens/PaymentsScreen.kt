@@ -6,7 +6,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -22,8 +24,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Repeat
+import androidx.compose.material.icons.outlined.SwapVert
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -61,6 +68,7 @@ import com.leona.controlepagamentos.data.model.CategoryEntity
 import com.leona.controlepagamentos.data.model.PaymentEntity
 import com.leona.controlepagamentos.data.model.PaymentMethod
 import com.leona.controlepagamentos.data.model.PaymentStatus
+import com.leona.controlepagamentos.data.model.RecurringPaymentRuleEntity
 import com.leona.controlepagamentos.domain.money.MoneyFormatter
 import com.leona.controlepagamentos.ui.components.formatMoney
 import com.leona.controlepagamentos.ui.components.shortTime
@@ -74,6 +82,8 @@ import com.leona.controlepagamentos.ui.components.shortDate
 import com.leona.controlepagamentos.ui.viewmodel.PaymentFilter
 import com.leona.controlepagamentos.ui.viewmodel.PaymentsUiState
 import java.time.LocalDate
+
+enum class PaymentSort { DATE_ASC, DATE_DESC, AMOUNT_ASC, AMOUNT_DESC, DAILY_TOTAL_ASC, DAILY_TOTAL_DESC }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -89,10 +99,16 @@ fun PaymentsScreen(
     onAddRecurring: (String, String, String, String, String?, PaymentMethod?, String?) -> Unit,
     onUpdatePayment: (PaymentEntity) -> Unit = {},
     onDeletePayment: (String) -> Unit = {},
+    onUpdateRecurring: (RecurringPaymentRuleEntity) -> Unit = {},
+    onDeleteRecurring: (String) -> Unit = {},
+    categoryFilter: String? = null,
+    onSetCategoryFilter: (String?) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     var showForm by rememberSaveable { mutableStateOf(false) }
     var selectedPayment by remember { mutableStateOf<PaymentEntity?>(null) }
+    var sortOrder by rememberSaveable { mutableStateOf(PaymentSort.DATE_ASC) }
+    var showRecurringSheet by remember { mutableStateOf(false) }
 
     Box(modifier = modifier) {
         Column(modifier = Modifier.fillMaxSize()) {
@@ -109,10 +125,110 @@ fun PaymentsScreen(
                 contentPadding = PaddingValues(start = 16.dp, top = 12.dp, end = 16.dp, bottom = 96.dp)
             ) {
             item {
-                PaymentFilterRow(uiState.filter, onFilterChanged)
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(modifier = Modifier.weight(1f)) {
+                            PaymentFilterRow(uiState.filter, onFilterChanged)
+                        }
+                        var showSortMenu by remember { mutableStateOf(false) }
+                        Box {
+                            IconButton(onClick = { showSortMenu = true }) {
+                                Icon(
+                                    Icons.Outlined.SwapVert,
+                                    contentDescription = null,
+                                    tint = if (sortOrder != PaymentSort.DATE_ASC)
+                                        MaterialTheme.colorScheme.primary
+                                    else
+                                        LocalContentColor.current
+                                )
+                            }
+                            DropdownMenu(
+                                expanded = showSortMenu,
+                                onDismissRequest = { showSortMenu = false }
+                            ) {
+                                val checkIcon: @Composable (PaymentSort) -> Unit = { s ->
+                                    if (sortOrder == s) Icon(Icons.Outlined.CheckCircle, contentDescription = null)
+                                }
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(R.string.sort_date_asc)) },
+                                    leadingIcon = { checkIcon(PaymentSort.DATE_ASC) },
+                                    onClick = { sortOrder = PaymentSort.DATE_ASC; showSortMenu = false }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(R.string.sort_date_desc)) },
+                                    leadingIcon = { checkIcon(PaymentSort.DATE_DESC) },
+                                    onClick = { sortOrder = PaymentSort.DATE_DESC; showSortMenu = false }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(R.string.sort_amount_asc)) },
+                                    leadingIcon = { checkIcon(PaymentSort.AMOUNT_ASC) },
+                                    onClick = { sortOrder = PaymentSort.AMOUNT_ASC; showSortMenu = false }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(R.string.sort_amount_desc)) },
+                                    leadingIcon = { checkIcon(PaymentSort.AMOUNT_DESC) },
+                                    onClick = { sortOrder = PaymentSort.AMOUNT_DESC; showSortMenu = false }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(R.string.sort_daily_total_asc)) },
+                                    leadingIcon = { checkIcon(PaymentSort.DAILY_TOTAL_ASC) },
+                                    onClick = { sortOrder = PaymentSort.DAILY_TOTAL_ASC; showSortMenu = false }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(R.string.sort_daily_total_desc)) },
+                                    leadingIcon = { checkIcon(PaymentSort.DAILY_TOTAL_DESC) },
+                                    onClick = { sortOrder = PaymentSort.DAILY_TOTAL_DESC; showSortMenu = false }
+                                )
+                            }
+                        }
+                    }
+                    if (uiState.categories.isNotEmpty()) {
+                        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            item {
+                                FilterChip(
+                                    selected = categoryFilter == null,
+                                    onClick = { onSetCategoryFilter(null) },
+                                    label = { Text(stringResource(R.string.filter_all)) }
+                                )
+                            }
+                            items(uiState.categories, key = { it.id }) { category ->
+                                FilterChip(
+                                    selected = categoryFilter == category.id,
+                                    onClick = {
+                                        onSetCategoryFilter(
+                                            if (categoryFilter == category.id) null else category.id
+                                        )
+                                    },
+                                    label = { Text(category.name) }
+                                )
+                            }
+                        }
+                    }
+                }
             }
 
-            val grouped = uiState.payments.groupBy { it.dueDate }.toSortedMap()
+            val basePayments = if (categoryFilter != null)
+                uiState.payments.filter { it.categoryId == categoryFilter }
+            else
+                uiState.payments
+            val grouped: Map<LocalDate, List<PaymentEntity>> = run {
+                val base = basePayments.groupBy { it.dueDate }
+                when (sortOrder) {
+                    PaymentSort.DATE_ASC -> base.toSortedMap()
+                    PaymentSort.DATE_DESC -> base.entries.sortedByDescending { it.key }.associate { it.key to it.value }
+                    PaymentSort.AMOUNT_ASC -> base.toSortedMap().mapValues { (_, v) -> v.sortedBy { it.amountInCents } }
+                    PaymentSort.AMOUNT_DESC -> base.toSortedMap().mapValues { (_, v) -> v.sortedByDescending { it.amountInCents } }
+                    PaymentSort.DAILY_TOTAL_ASC -> base.entries
+                        .sortedBy { (_, v) -> v.sumOf { it.amountInCents } }
+                        .associate { it.key to it.value }
+                    PaymentSort.DAILY_TOTAL_DESC -> base.entries
+                        .sortedByDescending { (_, v) -> v.sumOf { it.amountInCents } }
+                        .associate { it.key to it.value }
+                }
+            }
             if (grouped.isEmpty() && uiState.recurringOccurrences.isEmpty()) {
                 item { EmptyText(stringResource(R.string.empty_payments)) }
             } else {
@@ -136,6 +252,18 @@ fun PaymentsScreen(
                         RecurringPaymentRow(occurrence = occurrence, onMarkPaid = onMarkRecurringPaid)
                     }
                 }
+                if (uiState.recurringRules.isNotEmpty()) {
+                    item {
+                        TextButton(
+                            onClick = { showRecurringSheet = true },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Icon(Icons.Outlined.Repeat, contentDescription = null)
+                            Spacer(Modifier.width(8.dp))
+                            Text(stringResource(R.string.action_manage_recurring))
+                        }
+                    }
+                }
             }
         }  // LazyColumn
         }  // Column
@@ -156,6 +284,16 @@ fun PaymentsScreen(
             onSave = { updated -> onUpdatePayment(updated); selectedPayment = null },
             onMarkPaid = { id -> onMarkPaid(id); selectedPayment = null },
             onDelete = { id -> onDeletePayment(id); selectedPayment = null }
+        )
+    }
+
+    if (showRecurringSheet) {
+        RecurringRulesSheet(
+            rules = uiState.recurringRules,
+            categories = uiState.categories,
+            onDismiss = { showRecurringSheet = false },
+            onUpdate = onUpdateRecurring,
+            onDelete = onDeleteRecurring
         )
     }
 
@@ -413,6 +551,188 @@ private fun PaymentDetailSheet(
                     modifier = Modifier.weight(1f)
                 ) { Text(stringResource(R.string.action_save)) }
             }
+            TextButton(
+                onClick = { showDeleteConfirm = true },
+                colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            ) { Text(stringResource(R.string.action_delete)) }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun RecurringRulesSheet(
+    rules: List<RecurringPaymentRuleEntity>,
+    categories: List<CategoryEntity>,
+    onDismiss: () -> Unit,
+    onUpdate: (RecurringPaymentRuleEntity) -> Unit,
+    onDelete: (String) -> Unit
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var selectedRule by remember { mutableStateOf<RecurringPaymentRuleEntity?>(null) }
+
+    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 20.dp)
+                .padding(bottom = 32.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                stringResource(R.string.screen_recurring_rules),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.SemiBold
+            )
+            HorizontalDivider()
+            if (rules.isEmpty()) {
+                EmptyText(stringResource(R.string.empty_recurring_desc))
+            } else {
+                rules.forEach { rule ->
+                    RecurringRuleRow(rule) { selectedRule = rule }
+                }
+            }
+        }
+    }
+
+    selectedRule?.let { rule ->
+        RecurringRuleDetailSheet(
+            rule = rule,
+            categories = categories,
+            onDismiss = { selectedRule = null },
+            onSave = { updated -> onUpdate(updated); selectedRule = null },
+            onDelete = { id -> onDelete(id); selectedRule = null }
+        )
+    }
+}
+
+@Composable
+private fun RecurringRuleRow(rule: RecurringPaymentRuleEntity, onClick: () -> Unit) {
+    Card(
+        onClick = onClick,
+        shape = RoundedCornerShape(8.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier.padding(14.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(rule.title, fontWeight = FontWeight.SemiBold)
+                Text(
+                    stringResource(R.string.recurring_day_label, rule.dayOfMonth),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            AmountText(rule.amountInCents)
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun RecurringRuleDetailSheet(
+    rule: RecurringPaymentRuleEntity,
+    categories: List<CategoryEntity>,
+    onDismiss: () -> Unit,
+    onSave: (RecurringPaymentRuleEntity) -> Unit,
+    onDelete: (String) -> Unit
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var title by remember { mutableStateOf(rule.title) }
+    var amountDigits by remember { mutableStateOf(rule.amountInCents.toString()) }
+    var dayOfMonth by remember { mutableStateOf(rule.dayOfMonth.toString()) }
+    var selectedCategory by remember { mutableStateOf(rule.categoryId) }
+    var method by remember { mutableStateOf(rule.paymentMethod) }
+    var notes by remember { mutableStateOf(rule.notes.orEmpty()) }
+    var showDeleteConfirm by remember { mutableStateOf(false) }
+
+    if (showDeleteConfirm) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirm = false },
+            title = { Text(stringResource(R.string.dialog_delete_recurring_title)) },
+            text = { Text(stringResource(R.string.dialog_delete_recurring_desc)) },
+            confirmButton = {
+                TextButton(
+                    onClick = { onDelete(rule.id) },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                ) { Text(stringResource(R.string.action_delete)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteConfirm = false }) {
+                    Text(stringResource(R.string.action_cancel))
+                }
+            }
+        )
+    }
+
+    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 20.dp)
+                .padding(bottom = 32.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                rule.title,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold
+            )
+            HorizontalDivider()
+            OutlinedTextField(
+                value = title,
+                onValueChange = { title = it },
+                label = { Text(stringResource(R.string.form_title)) },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+            val amountDisplay = formatAmountInput(amountDigits)
+            OutlinedTextField(
+                value = TextFieldValue(amountDisplay, selection = TextRange(amountDisplay.length)),
+                onValueChange = { amountDigits = it.text.filter { c -> c.isDigit() }.take(10) },
+                label = { Text(stringResource(R.string.form_amount)) },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                modifier = Modifier.fillMaxWidth()
+            )
+            OutlinedTextField(
+                value = dayOfMonth,
+                onValueChange = { dayOfMonth = it.filter { c -> c.isDigit() }.take(2) },
+                label = { Text(stringResource(R.string.form_day_of_month)) },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                modifier = Modifier.fillMaxWidth()
+            )
+            CategorySelector(categories, selectedCategory, { selectedCategory = it })
+            PaymentMethodSelector(selected = method, onSelected = { method = it })
+            OutlinedTextField(
+                value = notes,
+                onValueChange = { notes = it },
+                label = { Text(stringResource(R.string.form_notes)) },
+                modifier = Modifier.fillMaxWidth(),
+                minLines = 2
+            )
+            Button(
+                onClick = {
+                    val newAmount = MoneyFormatter.parseToCents(formatAmountInput(amountDigits))
+                        ?: rule.amountInCents
+                    val newDay = dayOfMonth.toIntOrNull()?.coerceIn(1, 31) ?: rule.dayOfMonth
+                    onSave(rule.copy(
+                        title = title.trim().ifBlank { rule.title },
+                        amountInCents = newAmount,
+                        dayOfMonth = newDay,
+                        categoryId = selectedCategory,
+                        paymentMethod = method,
+                        notes = notes.trim().ifBlank { null }
+                    ))
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) { Text(stringResource(R.string.action_save)) }
             TextButton(
                 onClick = { showDeleteConfirm = true },
                 colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),

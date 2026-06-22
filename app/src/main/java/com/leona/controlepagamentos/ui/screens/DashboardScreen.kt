@@ -1,6 +1,7 @@
 package com.leona.controlepagamentos.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -67,6 +68,7 @@ fun DashboardScreen(
     onMarkPaid: (String) -> Unit,
     onMarkRecurringPaid: (RecurringOccurrence) -> Unit,
     onNavigateToCaptures: () -> Unit = {},
+    onNavigateToPaymentsByCategory: (String?) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val categoryMaxAmount = uiState.categoryTotals.maxOfOrNull { it.amountInCents }?.takeIf { it > 0 } ?: 1L
@@ -125,7 +127,8 @@ fun DashboardScreen(
                     CategoryBar(
                         total = total,
                         maxAmount = categoryMaxAmount,
-                        colorHex = categoryColorMap[total.categoryId]
+                        colorHex = categoryColorMap[total.categoryId],
+                        onClick = { onNavigateToPaymentsByCategory(total.categoryId) }
                     )
                 }
             }
@@ -203,14 +206,18 @@ private fun StatTile(
 private fun CategoryBar(
     total: CategoryTotal,
     maxAmount: Long,
-    colorHex: String?
+    colorHex: String?,
+    onClick: () -> Unit = {}
 ) {
     val barColor = colorHex?.let {
         runCatching { Color(android.graphics.Color.parseColor(it)) }.getOrNull()
     } ?: MaterialTheme.colorScheme.primary
 
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {

@@ -24,4 +24,7 @@ interface RecurringPaymentRuleDao {
 
     @Update
     suspend fun update(rule: RecurringPaymentRuleEntity)
+
+    @Query("DELETE FROM recurring_payment_rules WHERE id = :id")
+    suspend fun delete(id: String)
 }

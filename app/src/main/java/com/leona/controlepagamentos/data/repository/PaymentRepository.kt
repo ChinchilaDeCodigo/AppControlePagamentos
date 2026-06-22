@@ -260,6 +260,14 @@ class PaymentRepository(
         paymentDao.delete(id)
     }
 
+    suspend fun updateRecurringRule(rule: RecurringPaymentRuleEntity) {
+        recurringPaymentRuleDao.update(rule.copy(updatedAt = LocalDateTime.now()))
+    }
+
+    suspend fun deleteRecurringRule(id: String) {
+        recurringPaymentRuleDao.delete(id)
+    }
+
     suspend fun setSourceEnabled(source: NotificationSourceEntity, enabled: Boolean) {
         notificationSourceDao.update(
             source.copy(isEnabled = enabled, updatedAt = LocalDateTime.now())

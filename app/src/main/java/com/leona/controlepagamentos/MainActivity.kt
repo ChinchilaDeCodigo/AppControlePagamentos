@@ -100,6 +100,7 @@ private fun PaymentsApp(viewModel: PaymentsViewModel, uiState: PaymentsUiState) 
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     var selectedTab by rememberSaveable { mutableStateOf(MainTab.DASHBOARD) }
+    var categoryFilter by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(uiState.errorMessage) {
         val message = uiState.errorMessage ?: return@LaunchedEffect
@@ -154,6 +155,10 @@ private fun PaymentsApp(viewModel: PaymentsViewModel, uiState: PaymentsUiState) 
                 onMarkPaid = viewModel::markPaid,
                 onMarkRecurringPaid = viewModel::markRecurringPaid,
                 onNavigateToCaptures = { selectedTab = MainTab.CAPTURES },
+                onNavigateToPaymentsByCategory = { id ->
+                    categoryFilter = id
+                    selectedTab = MainTab.PAYMENTS
+                },
                 modifier = contentModifier
             )
             MainTab.PAYMENTS -> PaymentsScreen(
@@ -168,6 +173,10 @@ private fun PaymentsApp(viewModel: PaymentsViewModel, uiState: PaymentsUiState) 
                 onAddRecurring = viewModel::addRecurringPayment,
                 onUpdatePayment = viewModel::updatePayment,
                 onDeletePayment = viewModel::deletePayment,
+                onUpdateRecurring = viewModel::updateRecurringRule,
+                onDeleteRecurring = viewModel::deleteRecurringRule,
+                categoryFilter = categoryFilter,
+                onSetCategoryFilter = { categoryFilter = it },
                 modifier = contentModifier
             )
             MainTab.CAPTURES -> CapturesScreen(

@@ -110,6 +110,21 @@
     <string name="empty_budgets">Nenhum teto configurado para este mês.</string>
     <string name="empty_category_totals">Sem pagamentos pagos neste mês.</string>
 
+    <!-- Sort options -->
+    <string name="sort_date_asc">Mais antigo</string>
+    <string name="sort_date_desc">Mais recente</string>
+    <string name="sort_amount_asc">Menor valor no dia</string>
+    <string name="sort_amount_desc">Maior valor no dia</string>
+    <string name="sort_daily_total_asc">Dia com menos gasto</string>
+    <string name="sort_daily_total_desc">Dia com mais gasto</string>
+
+    <!-- Recurring management -->
+    <string name="action_manage_recurring">Gerenciar recorrências</string>
+    <string name="screen_recurring_rules">Recorrências</string>
+    <string name="recurring_day_label">Todo dia %d</string>
+    <string name="dialog_delete_recurring_title">Excluir recorrência?</string>
+    <string name="dialog_delete_recurring_desc">Ela será removida permanentemente.</string>
+
     <!-- Actions -->
     <string name="action_confirm">Confirmar</string>
     <string name="action_cancel">Cancelar</string>
